@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{643C452B-B11D-43B9-94AA-DB89F069EB5F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NeuroNet.Model</RootNamespace>
+    <AssemblyName>NeuroNet.Model</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="FuzzyNumbers\DiscreteFuzzyNumber.cs" />
+    <Compile Include="FuzzyNumbers\IFuzzyFunction.cs" />
+    <Compile Include="FuzzyNumbers\IFuzzyNumber.cs" />
+    <Compile Include="FuzzyNumbers\IntervalD.cs" />
+    <Compile Include="FuzzyNumbers\PointD.cs" />
+    <Compile Include="FuzzyNumbers\TriangularFuzzyFunction.cs" />
+    <Compile Include="Misc\BinaryFileSerializer.cs" />
+    <Compile Include="Misc\IPatternPreparer.cs" />
+    <Compile Include="Misc\IPricesProvider.cs" />
+    <Compile Include="Misc\LocalPricesProvider.cs" />
+    <Compile Include="Misc\PatternPreparer.cs" />
+    <Compile Include="Net\FuzzyNeuron.cs" />
+    <Compile Include="Net\IFuzzyNeuron.cs" />
+    <Compile Include="Net\ILayer.cs" />
+    <Compile Include="Net\ILink.cs" />
+    <Compile Include="FuzzyNumbers\MathExtensions.cs" />
+    <Compile Include="Net\INet.cs" />
+    <Compile Include="Net\LearningAlgorithm\BackPropagation.cs" />
+    <Compile Include="Net\LearningAlgorithm\ILearningPattern.cs" />
+    <Compile Include="Net\LearningAlgorithm\INeuronWeightsChanger.cs" />
+    <Compile Include="Net\Layer.cs" />
+    <Compile Include="Net\LearningAlgorithm\LearningPattern.cs" />
+    <Compile Include="Net\Link.cs" />
+    <Compile Include="Net\SimpleFuzzyNet.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

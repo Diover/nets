@@ -1,0 +1,264 @@
+﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace NeuroNet.Model.FuzzyNumbers
+{
+    [Serializable]
+    public class DiscreteFuzzyNumber : IFuzzyNumber
+    {
+        public const double Epsilon = 1E-15;
+        public const int StandardAlphaLevelsCount = 100;
+        private readonly Dictionary<double, IntervalD> _alphaLevels;
+
+        public DiscreteFuzzyNumber()
+        {
+            _alphaLevels = new Dictionary<double, IntervalD>();
+        }
+
+        public DiscreteFuzzyNumber(Dictionary<double, IntervalD> alphaLevels)
+        {
+            _alphaLevels = alphaLevels;
+        }
+
+        public DiscreteFuzzyNumber(IFuzzyFunction f, int levelsCount):this(new Dictionary<double, IntervalD>())
+        {
+            FillLevels(f, levelsCount);
+        }
+
+        public void FillLevels(IFuzzyFunction f, int levelsCount)
+        {
+            if (levelsCount <= 0)
+                levelsCount = StandardAlphaLevelsCount;
+
+            double d = 1.0/(levelsCount - 1);
+            for (int i = 0; i < levelsCount - 1; i++)
+            {
+                _alphaLevels.Add(d*i, f.GetAlphaLevel(d*i));
+            }
+            _alphaLevels.Add(1.0, f.GetAlphaLevel(1.0));
+        }
+
+        public void AddLevel(IntervalD level, double alpha)
+        {
+            if (_alphaLevels.ContainsKey(alpha))
+                _alphaLevels[alpha] = level;
+            else
+                _alphaLevels.Add(alpha, level);
+        }
+
+        public int LevelsCount
+        {
+            get { return _alphaLevels.Count; }
+        }
+
+        public void ForeachLevel(Action<double, IntervalD> action)
+        {
+            foreach (var level in _alphaLevels)
+            {
+                action(level.Key, level.Value);
+            }
+        }
+
+        private double GetMinAlphaLevel()
+        {
+            return _alphaLevels.Min(pair => pair.Key);
+        }
+
+        private double GetMaxAlphaLevel()
+        {
+            return _alphaLevels.Max(pair => pair.Key);
+        }
+
+        public PointD GetLeft()
+        {
+            var level = GetMinAlphaLevel();
+            return new PointD(_alphaLevels[level].X, level);
+        }
+
+        public PointD GetRight()
+        {
+            var level = GetMinAlphaLevel();
+            return new PointD(_alphaLevels[level].Y, level);
+        }
+
+        public PointD GetMod()
+        {
+            var level = GetMaxAlphaLevel();
+            return new PointD(_alphaLevels[level].X, level);
+        }
+        
+        public IntervalD GetAlphaLevel(double alpha)
+        {
+            if (_alphaLevels.ContainsKey(alpha))
+                return _alphaLevels[alpha];
+            else
+                throw new ArgumentException("No such alpha-level", "alpha");
+        }
+
+        public static IFuzzyNumber GenerateLittleNumber(double min = -0.5, double max = 0.5, int levelsCount = StandardAlphaLevelsCount)
+        {
+            var f = PrepareLittleFuzzyFunction(min, max);
+
+            var result = new DiscreteFuzzyNumber();
+            double d = 1.0 / (levelsCount - 1);
+            for (int i = 0; i < levelsCount - 1; i++)
+            {
+                result._alphaLevels.Add(d * i, f.GetAlphaLevel(d * i));
+            }
+            result._alphaLevels.Add(1.0, f.GetAlphaLevel(1.0));
+            
+            return result;
+        }
+
+        private static IFuzzyFunction PrepareLittleFuzzyFunction(double min, double max)
+        {
+            var rand = new Random(DateTime.Now.Millisecond);
+            var mid = (max - min)/2;
+
+            var leftOrRight = rand.Next(2);
+
+            var center = rand.NextDouble()*mid;
+            var left = rand.NextDouble()*mid;
+            var right = rand.NextDouble()*mid;
+
+            var addShift = new Func<double, double>(x => x + min + leftOrRight*mid);
+            return new TriangularFuzzyFunction(addShift(left), addShift(center), addShift(right));
+        }
+
+        public void Set(IFuzzyNumber source)
+        {
+            _alphaLevels.Clear();
+            source.ForeachLevel((alpha, interval) => _alphaLevels.Add(alpha, new IntervalD(interval)));
+        }
+
+        public bool ContainsAlphaLevel(double alpha)
+        {
+            return _alphaLevels.ContainsKey(alpha);
+        }
+
+        public IFuzzyNumber Mul(IFuzzyNumber y)
+        {
+            return Operation((a, b) => a*b, this, y);
+        }
+
+        private static IFuzzyNumber MultiplyNegativeByNegative(IFuzzyNumber x, IFuzzyNumber y)
+        {
+            //(x + p)*(y + d) -> (xy + py + xd + pd) - xd - py - pd
+
+            var p = 0.0 - x.GetAlphaLevel(0.0).X + 1;
+            var py = y.Mul(p);
+
+            var d = 0.0 - y.GetAlphaLevel(0.0).X + 1;
+            var dx = x.Mul(d);
+
+            var pd = p*d;
+
+            return x.Sum(p).Mul(y.Sum(d)).Sub(py).Sub(dx).Sub(pd);
+
+        }
+
+        private static IFuzzyNumber MultiplyLeftPositiveByZeroOrNegative(IFuzzyNumber x, IFuzzyNumber y)
+        {
+            //x*(y + d) -> (xy + xd) - xd
+            var d = 0.0 - y.GetAlphaLevel(0.0).X + 1;
+            var dx = x.Mul(d);
+
+            return y.Sum(d).Mul(x).Sub(dx);
+        }
+
+        private static IFuzzyNumber Operation(Func<double, double, double> f, IFuzzyNumber y, IFuzzyNumber x)
+        {
+            var resultLevels = new Dictionary<double, IntervalD>();
+
+            y.ForeachLevel((alpha, interval) =>
+                {
+                    var rightLevel = x.GetAlphaLevel(alpha);
+
+                    var leftProduct = f(interval.X , rightLevel.X);
+                    var leftRightProduct = f(interval.X, rightLevel.Y);
+                    var rightLeftProduct = f(interval.Y, rightLevel.X);
+                    var rightProduct = f(interval.Y, rightLevel.Y);
+
+                    var left = Math.Min(Math.Min(leftProduct, leftRightProduct),
+                                        Math.Min(rightProduct, rightLeftProduct));
+                    var right = Math.Max(Math.Max(leftProduct, leftRightProduct),
+                                         Math.Max(rightProduct, rightLeftProduct));
+
+                    resultLevels.Add(alpha, new IntervalD(left, right));
+                });
+
+            return new DiscreteFuzzyNumber(resultLevels);
+        }
+
+        public IFuzzyNumber Sum(IFuzzyNumber x)
+        {
+            var resultLevels = new Dictionary<double, IntervalD>();
+
+            foreach (var leftlevel in _alphaLevels)
+            {
+                var rightLevel = x.GetAlphaLevel(leftlevel.Key);
+                resultLevels.Add(leftlevel.Key, rightLevel + leftlevel.Value);
+            }
+
+            return new DiscreteFuzzyNumber(resultLevels);
+        }
+
+        public IFuzzyNumber Sub(IFuzzyNumber x)
+        {
+            var resultLevels = new Dictionary<double, IntervalD>();
+
+            foreach (var leftlevel in _alphaLevels)
+            {
+                var rightLevel = x.GetAlphaLevel(leftlevel.Key);
+                resultLevels.Add(leftlevel.Key, leftlevel.Value - rightLevel);
+            }
+
+            return new DiscreteFuzzyNumber(resultLevels);
+        }
+
+        public IFuzzyNumber Div(IFuzzyNumber y)
+        {
+            return Operation((a, b) => a / b, this, y);
+        }
+
+        public IFuzzyNumber Mul(double factor)
+        {
+            var resultLevels = _alphaLevels.ToDictionary(level => level.Key, level => new IntervalD(level.Value.X*factor, level.Value.Y*factor));
+            return new DiscreteFuzzyNumber(resultLevels);
+        }
+
+        public IFuzzyNumber Sum(double factor)
+        {
+            var resultLevels = _alphaLevels.ToDictionary(level => level.Key, level => new IntervalD(level.Value.X + factor, level.Value.Y + factor));
+            return new DiscreteFuzzyNumber(resultLevels);
+        }
+
+        public IFuzzyNumber Sub(double factor)
+        {
+            var resultLevels = _alphaLevels.ToDictionary(level => level.Key, level => new IntervalD(level.Value.X - factor, level.Value.Y - factor));
+            return new DiscreteFuzzyNumber(resultLevels);
+        }
+
+        public IFuzzyNumber Div(double factor)
+        {
+            if(Math.Abs(factor - 0.0) < Epsilon)
+                throw new DivideByZeroException("factor is equal to 0.0");
+            var resultLevels = _alphaLevels.ToDictionary(level => level.Key, level => new IntervalD(level.Value.X / factor, level.Value.Y / factor));
+            return new DiscreteFuzzyNumber(resultLevels);
+        }
+
+        public IFuzzyNumber Operation(Func<double, double, double> f, double factor)
+        {
+            var resultLevels = _alphaLevels.ToDictionary(level => level.Key, level => new IntervalD(f(factor, level.Value.X), f(factor, level.Value.Y)));
+            return new DiscreteFuzzyNumber(resultLevels);
+        }
+
+        public IFuzzyNumber Apply(Func<double, double> f)
+        {
+            var resultLevels = _alphaLevels.ToDictionary(level => level.Key, level => new IntervalD(f(level.Value.X), f(level.Value.Y)));
+            return new DiscreteFuzzyNumber(resultLevels);
+        }
+    }
+}
