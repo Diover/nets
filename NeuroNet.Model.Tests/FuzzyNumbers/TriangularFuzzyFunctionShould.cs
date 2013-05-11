@@ -46,7 +46,7 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
         }
 
         [Test]
-        public void OrderGivenValues()
+        public void SwapLeftModRightValuesAfterConstruction()
         {
             const double left = 0.5;
             const double mod = -5.0;
@@ -63,7 +63,7 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
         }
 
         [Test]
-        public void OrderGivenValues2()
+        public void SwapLeftAndRightValuesAfterConstruction()
         {
             const double left = 0.5;
             const double mod = 0.0;
@@ -80,13 +80,13 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
         }
 
         [Test]
-        public void Return1And3On0_5AlphaLevel()
+        public void ReturnCorrectLeftAndRightOnGivenAlphaLevel1()
         {
             AssertReturnValuesOnAlphaLevel(0.5, 1.0, 3.0);
         }
 
         [Test]
-        public void Return0_5And3_5On0_25AlphaLevel()
+        public void ReturnCorrectLeftAndRightOnGivenAlphaLevel2()
         {
             AssertReturnValuesOnAlphaLevel(0.25, 0.5, 3.5);
         }
