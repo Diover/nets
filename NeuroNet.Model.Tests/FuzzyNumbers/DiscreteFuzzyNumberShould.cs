@@ -12,7 +12,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
         public void BeEmptyAfterConstruction()
         {
             var number = new DiscreteFuzzyNumber();
-
             var result = number.LevelsCount;
 
             Assert.That(result, Is.EqualTo(0));
@@ -26,11 +25,9 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {0.0, new IntervalD(1.0, 3.0)},
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
-
             var number = new DiscreteFuzzyNumber(levels);
-
             var result = number.LevelsCount;
-
+            
             Assert.That(result, Is.EqualTo(2));
         }
 
@@ -42,9 +39,7 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                 {
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
-
             var number = new DiscreteFuzzyNumber(levels);
-
             var result = number.GetMod();
 
             Assert.That(result, Is.EqualTo(new PointD(2.0, 1.0)));
@@ -57,9 +52,7 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                 {
                     {0.0, new IntervalD(1.0, 3.0)},
                 };
-
             var number = new DiscreteFuzzyNumber(levels);
-
             var result = number.GetRight();
 
             Assert.That(result, Is.EqualTo(new PointD(3.0, 0.0)));
@@ -72,9 +65,7 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                 {
                     {0.0, new IntervalD(1.0, 3.0)},
                 };
-
             var number = new DiscreteFuzzyNumber(levels);
-
             var result = number.GetRight();
 
             Assert.That(result, Is.EqualTo(new PointD(3.0, 0.0)));
@@ -89,9 +80,7 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {0.5, new IntervalD(0.5, 2.5)},
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
-
             var number = new DiscreteFuzzyNumber(levels);
-
             var level0_0 = number.GetAlphaLevel(0.0);
             var level0_5 = number.GetAlphaLevel(0.5);
             var level1_0 = number.GetAlphaLevel(1.0);
@@ -111,7 +100,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
             var x = new DiscreteFuzzyNumber(levelsLeft);
-
             var levelsRight = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(1.0, 3.0)},
@@ -135,7 +123,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
             var x = new DiscreteFuzzyNumber(levelsLeft);
-
             var levelsRight = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(1.0, 3.0)},
@@ -152,7 +139,7 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
         }
 
         [Test]
-        public void GenerateLettleNumbersInRange()
+        public void GenerateLittleNumbersInRange()
         {
             const double min = -0.5;
             const double max = 0.5;
@@ -160,7 +147,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
             var result = DiscreteFuzzyNumber.GenerateLittleNumber(min, max, levelsCount);
 
             Assert.That(result.LevelsCount, Is.EqualTo(levelsCount));
-            
             result.ForeachLevel((alpha, level) =>
                 {
                     Assert.That(result.GetAlphaLevel(0.0).X, Is.GreaterThan(min));
@@ -178,7 +164,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(0.0, 0.0)},
                 };
             var x = new DiscreteFuzzyNumber(levelsLeft);
-
             var levelsRight = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(1.0, 3.0)},
@@ -204,7 +189,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
             var x = new DiscreteFuzzyNumber(levelsLeft);
-
             var levelsRight = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(-2.0, 2.0)},
@@ -224,7 +208,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
         public void CorrectlyMultiplyPositiveByZero2()
         {
             var x = new DiscreteFuzzyNumber(new TriangularFuzzyFunction(-3.0,-1.0,2.0), 3);
-
             var y = new DiscreteFuzzyNumber(new TriangularFuzzyFunction(-2.0, 1.0, 4.0), 3);
 
             var product = x.Mul(y);
@@ -244,7 +227,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(0.0, 0.0)},
                 };
             var x = new DiscreteFuzzyNumber(levelsLeft);
-
             var levelsRight = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(-2.0, 2.0)},
@@ -274,13 +256,13 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
 
             var activation = x.Apply(f);
 
-            var valueOnLevel00 = new IntervalD(f(-2.0), f(2.0));
-            var valueOnLevel05 = new IntervalD(f(-1.0), f(1.0));
-            var valueOnLevel10 = new IntervalD(f(0.0), f(0.0));
+            var expectedValueOnLevel00 = new IntervalD(f(-2.0), f(2.0));
+            var expectedValueOnLevel05 = new IntervalD(f(-1.0), f(1.0));
+            var expectedValueOnLevel10 = new IntervalD(f(0.0), f(0.0));
 
-            Assert.That(activation.GetAlphaLevel(0.0), Is.EqualTo(valueOnLevel00));
-            Assert.That(activation.GetAlphaLevel(0.5), Is.EqualTo(valueOnLevel05));
-            Assert.That(activation.GetAlphaLevel(1.0), Is.EqualTo(valueOnLevel10));
+            Assert.That(activation.GetAlphaLevel(0.0), Is.EqualTo(expectedValueOnLevel00));
+            Assert.That(activation.GetAlphaLevel(0.5), Is.EqualTo(expectedValueOnLevel05));
+            Assert.That(activation.GetAlphaLevel(1.0), Is.EqualTo(expectedValueOnLevel10));
         }
 
         [Test]
@@ -315,7 +297,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
             var x = new DiscreteFuzzyNumber(levelsLeft);
-
             var levelsRight = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(1.0, 3.0)},
@@ -339,7 +320,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
             var x = new DiscreteFuzzyNumber(levelsLeft);
-
             var levelsRight = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(1.0, 3.0)},
@@ -365,7 +345,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
             var x = new DiscreteFuzzyNumber(levelsLeft);
-
             var levelsRight = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(1.0, 3.0)},
@@ -389,7 +368,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
             var x = new DiscreteFuzzyNumber(levelsLeft);
-
             var levelsRight = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(1.0, 3.0)},
@@ -461,7 +439,6 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers
                     {1.0, new IntervalD(2.0, 2.0)},
                 };
             var x = new DiscreteFuzzyNumber(levels);
-
             var newLevels = new Dictionary<double, IntervalD>
                 {
                     {0.0, new IntervalD(-2.0, 2.0)},
