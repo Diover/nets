@@ -9,7 +9,7 @@ namespace NeuroNet.Model.Tests.Misc
     [TestFixture]
     public class BinarySerializerShould
     {
-        private const string _filename = "H:\\binarySerializerTest.net";
+        private const string _filename = "binarySerializerTest.net";
 
         [Test]
         public void SaveAndLoadNetState()

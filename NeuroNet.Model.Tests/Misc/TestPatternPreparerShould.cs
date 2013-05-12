@@ -6,7 +6,7 @@ namespace NeuroNet.Model.Tests.Misc
     [TestFixture]
     public class TestPatternPreparerShould
     {
-        private const string _filename = "H:\\testPatterns.txt";
+        private const string _filename = "testPatterns.txt";
         [Test]
         public void ParseFile()
         {
