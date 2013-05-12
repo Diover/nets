@@ -54,7 +54,7 @@
     <Compile Include="Net\IFuzzyNeuron.cs" />
     <Compile Include="Net\ILayer.cs" />
     <Compile Include="Net\ILink.cs" />
-    <Compile Include="FuzzyNumbers\MathExtensions.cs" />
+    <Compile Include="FuzzyNumbers\FuzzyNumberExtensions.cs" />
     <Compile Include="Net\INet.cs" />
     <Compile Include="Net\LearningAlgorithm\BackPropagation.cs" />
     <Compile Include="Net\LearningAlgorithm\ILearningPattern.cs" />

@@ -85,7 +85,7 @@ namespace NeuroNet.Model.Net
 
         public void Propagate()
         {
-            _output.Signal = MathExtensions.Sum(0, _inputs.Count,
+            _output.Signal = FuzzyNumberExtensions.Sum(0, _inputs.Count,
                                                 i => _inputs.ElementAt(i)
                                                             .Signal
                                                             .Mul(_weights.ElementAt(i).Signal))

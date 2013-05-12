@@ -135,7 +135,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     {
                         var output = neuron.LastOutput; //Ok
                         var part = output.Mul(output.Apply(levelValue => 1 - levelValue)); //Oj(1 - Oj)
-                        var sum = MathExtensions.Sum(0, outputLayer.NeuronsCount, j => outputLayer.GetNeuron(j)
+                        var sum = FuzzyNumberExtensions.Sum(0, outputLayer.NeuronsCount, j => outputLayer.GetNeuron(j)
                                                                                                   .GetWeight(i)
                                                                                                   .Signal
                                                                                                   .Mul(

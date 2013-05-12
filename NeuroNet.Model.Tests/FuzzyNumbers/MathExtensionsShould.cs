@@ -28,7 +28,7 @@ namespace NeuroNet.Model.Tests.Net
                         }),
                 };
 
-            var result = MathExtensions.Sum(0, source.Count, source.ElementAt);
+            var result = FuzzyNumberExtensions.Sum(0, source.Count, source.ElementAt);
 
             Assert.That(result.LevelsCount, Is.EqualTo(3));
             Assert.That(result.GetAlphaLevel(0.0), Is.EqualTo(new IntervalD(2.0, 6.0)));

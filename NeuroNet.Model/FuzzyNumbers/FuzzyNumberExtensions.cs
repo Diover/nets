@@ -1,9 +1,8 @@
 ﻿using System;
-using NeuroNet.Model.FuzzyNumbers;
 
-namespace NeuroNet.Model.Net
+namespace NeuroNet.Model.FuzzyNumbers
 {
-    public class MathExtensions
+    public class FuzzyNumberExtensions
     {
         public static IFuzzyNumber Sum(int start, int end, Func<int, IFuzzyNumber> f)
         {
