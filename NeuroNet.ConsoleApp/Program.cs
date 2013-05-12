@@ -22,8 +22,13 @@ namespace NeuroNet.ConsoleApp
             var patterns = new TestPatternPreparer("H:\\testPatterns.txt").PreparePatterns();
 
             var bp = new BackPropagation(patterns);
-            bp.StepPerformed +=
-                (cycle, step, error) => Console.WriteLine("cycle: " + cycle + " step: " + step + " error: " + error);
+            bp.CyclePerformed +=
+                (cycle, error) =>
+                    {
+                        if (cycle%50 == 0)
+                            Console.WriteLine("cycle: " + cycle + 
+                                              " error: " + error.ToString("0.##########################################"));
+                    };
             bp.LearnNet(net);
 
             BinaryFileSerializer.SaveNetState("H:\\LearnedNet.net", net);
