@@ -4,7 +4,9 @@ using NeuroNet.Model.FuzzyNumbers;
 
 namespace NeuroNet.Model.Net.LearningAlgorithm
 {
-    public delegate void StepPerformedEventHandler(int cycle, int step, double error);
+    public delegate void StepPerformedEventHandler(int cycle, int step, double stepError);
+    public delegate void CyclePerformedEventHandler(int cycle, double cycleError);
+
     public class BackPropagation
     {
         private readonly List<ILearningPattern> _patterns;
@@ -47,14 +49,29 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                         ChangeWeights(net.Layers);
                     }
 
-                    StepPerformed(cycle, step, learningCycleError);
+                    OnStepPerformed(cycle, step, learningCycleError);
                     step++;
                 }
+
+                OnCyclePerformed(cycle, learningCycleError);
                 cycle++;
             } while (learningCycleError > _errorThreshold);
         }
 
         public event StepPerformedEventHandler StepPerformed;
+        public event CyclePerformedEventHandler CyclePerformed;
+
+        private void OnStepPerformed(int cycle, int step, double stepError)
+        {
+            if (StepPerformed != null)
+                StepPerformed(cycle, step, stepError);
+        }
+
+        private void OnCyclePerformed(int cycle, double cycleError)
+        {
+            if (CyclePerformed != null)
+                CyclePerformed(cycle, cycleError);
+        }
 
         private static double CalculatePatternError(INet net, List<IFuzzyNumber> patterns, List<IFuzzyNumber> outputs)
         {
