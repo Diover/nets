@@ -16,13 +16,12 @@ namespace NeuroNet.Model.Net
         private ILink _output;
 
         [NonSerialized] private IFuzzyNumber _propagatedError;
-        [NonSerialized] private List<ILink> _weightsDeltas = new List<ILink>();
+        [NonSerialized] private readonly List<ILink> _weightsDeltas = new List<ILink>();
 
         public FuzzyNeuron(int levelsCount)
         {
             _propagatedError = null;
             _levelsCount = levelsCount;
-            _f = x => 1.0/(1.0 + Math.Pow(Math.E, -x));
         }
 
         public FuzzyNeuron(Func<double, double> f, int levelsCount)
