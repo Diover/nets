@@ -15,23 +15,24 @@ namespace NeuroNet.ConsoleApp
     {
         static void Main(string[] args)
         {
-            const int inputsCount = 3;
-            const int hiddenNeuronsCount = 2;
+            const int inputsCount = 2;
+            const int hiddenNeuronsCount = 1;
             var net = new SimpleFuzzyNet(inputsCount, hiddenNeuronsCount, levelsCount: 11);
 
-            var patterns = new TestPatternPreparer("H:\\testPatterns.txt").PreparePatterns();
+            var patterns = new TestPatternPreparer("testPatterns.txt").PreparePatterns();
 
             var bp = new BackPropagation(patterns);
             bp.CyclePerformed +=
                 (cycle, error) =>
                     {
-                        if (cycle%50 == 0)
+                        //Console.ReadKey();
+                        if (cycle%100 == 0)
                             Console.WriteLine("cycle: " + cycle + 
                                               " error: " + error.ToString("0.##########################################"));
                     };
             bp.LearnNet(net);
 
-            BinaryFileSerializer.SaveNetState("H:\\LearnedNet.net", net);
+            BinaryFileSerializer.SaveNetState("LearnedNet.net", net);
             //var inputs = new List<IFuzzyNumber>();
             //for (int i = 0; i < inputsCount; i++)
             //    inputs.Add(DiscreteFuzzyNumber.GenerateLittleNumber());
