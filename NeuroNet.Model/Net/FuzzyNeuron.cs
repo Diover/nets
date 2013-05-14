@@ -78,7 +78,7 @@ namespace NeuroNet.Model.Net
         public void AddInput(ILink link)
         {
             _inputs.Add(link);
-            _weights.Add(new Link(generateLittleFuzzyNumber()));
+            _weights.Add(new Link(_generateLittleFuzzyNumber()));
             _weightsDeltas.Add(new Link());
             _weightsLambdas.Add(_defaultWeightLambda);
         }
