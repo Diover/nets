@@ -34,7 +34,7 @@ namespace NeuroNet.Model.Net
 
         private void BuildStructure()
         {
-            _hidden.Foreach((i, neuron) =>
+            _hidden.ForeachNeuron((i, neuron) =>
                 {
                     foreach (var inputSignal in _inputSignals)
                     {

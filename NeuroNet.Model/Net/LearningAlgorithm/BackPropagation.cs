@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NeuroNet.Model.FuzzyNumbers;
 
@@ -96,7 +97,10 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             for (int i = 0; i < layers.Count; i++)
             {
                 var layer = layers.ElementAt(i);
-                layer.Foreach((j, neuron) => neuron.ForeachWeight((k, weight) =>
+                //foreach neuron (j) foreach weight (k): 
+                //1) dw(k) = dw(k)*_b + error*_n*(input_of j)
+                //2) w(k) = w(k) + dw(k)
+                layer.ForeachNeuron((j, neuron) => neuron.ForeachWeight((k, weight) =>
                     {
                         var delta = neuron.GetWeightDelta(k);
                         delta.Signal = CalculateNewDeltaForWeight(delta.Signal, neuron.PropagatedError,
@@ -119,7 +123,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         public static void PropagateErrorOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
         {
             var outputLayer = layers.Last();
-            outputLayer.Foreach((i, neuron) =>
+            outputLayer.ForeachNeuron((i, neuron) =>
                 {
                     var output = neuron.LastOutput; //Ok
                     var expectedOutput = patternsOutput.ElementAt(i); //tk
@@ -131,10 +135,10 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             var hiddenLayers = layers.Take(layers.Count - 1);
             foreach (var hiddenLayer in hiddenLayers)
             {
-                hiddenLayer.Foreach((i, neuron) =>
+                hiddenLayer.ForeachNeuron((i, neuron) =>
                     {
                         var output = neuron.LastOutput; //Ok
-                        var part = output.Mul(output.Apply(levelValue => 1 - levelValue)); //Oj(1 - Oj)
+                        var part = output.Mul(output.Apply(levelValue => 1 - levelValue)); //Ok(1 - Ok)
                         var sum = FuzzyNumberExtensions.Sum(0, outputLayer.NeuronsCount, j => outputLayer.GetNeuron(j)
                                                                                                   .GetWeight(i)
                                                                                                   .Signal

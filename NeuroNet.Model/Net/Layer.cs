@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Accord.Math;
+using Accord.Math.Optimization;
 using NeuroNet.Model.FuzzyNumbers;
 using System.Linq;
 
@@ -29,7 +31,7 @@ namespace NeuroNet.Model.Net
             _neurons.Add(neuron);
         }
 
-        public void Foreach(Action<int, IFuzzyNeuron> action)
+        public void ForeachNeuron(Action<int, IFuzzyNeuron> action)
         {
             int i = 0;
             foreach (var neuron in _neurons)
@@ -47,7 +49,7 @@ namespace NeuroNet.Model.Net
                 var output = new Link();
                 _forwardLinks.Add(output);
                 neuron.SetOutput(output);
-                nextLayer.Foreach((i, nextNeuron) => nextNeuron.AddInput(output));
+                nextLayer.ForeachNeuron((i, nextNeuron) => nextNeuron.AddInput(output));
             }
         }
 
