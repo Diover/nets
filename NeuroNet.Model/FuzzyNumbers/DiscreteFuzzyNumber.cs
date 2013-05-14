@@ -172,14 +172,14 @@ namespace NeuroNet.Model.FuzzyNumbers
         {
             var resultLevels = new Dictionary<double, IntervalD>();
 
-            y.ForeachLevel((alpha, interval) =>
+            y.ForeachLevel((alpha, leftLevel) =>
                 {
                     var rightLevel = x.GetAlphaLevel(alpha);
 
-                    var leftProduct = f(interval.X , rightLevel.X);
-                    var leftRightProduct = f(interval.X, rightLevel.Y);
-                    var rightLeftProduct = f(interval.Y, rightLevel.X);
-                    var rightProduct = f(interval.Y, rightLevel.Y);
+                    var leftProduct      = f(leftLevel.X, rightLevel.X);
+                    var leftRightProduct = f(leftLevel.X, rightLevel.Y);
+                    var rightLeftProduct = f(leftLevel.Y, rightLevel.X);
+                    var rightProduct     = f(leftLevel.Y, rightLevel.Y);
 
                     var left = Math.Min(Math.Min(leftProduct, leftRightProduct),
                                         Math.Min(rightProduct, rightLeftProduct));
