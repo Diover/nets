@@ -10,7 +10,7 @@ namespace NeuroNet.Model.Tests.Net
     public class MathExtensionsShould
     {
         [Test]
-        public void Sum()
+        public void SumDiscreteNumbers()
         {
             var source = new List<IFuzzyNumber>
                 {
@@ -28,12 +28,26 @@ namespace NeuroNet.Model.Tests.Net
                         }),
                 };
 
-            var result = FuzzyNumberExtensions.Sum(0, source.Count, source.ElementAt);
+            var result = FuzzyNumberExtensions.Sum(0, source.Count, i => source.ElementAt(i).Mul(1.0));
 
             Assert.That(result.LevelsCount, Is.EqualTo(3));
             Assert.That(result.GetAlphaLevel(0.0), Is.EqualTo(new IntervalD(2.0, 6.0)));
             Assert.That(result.GetAlphaLevel(0.5), Is.EqualTo(new IntervalD(3.0, 5.0)));
             Assert.That(result.GetAlphaLevel(1.0), Is.EqualTo(new IntervalD(4.0, 4.0)));
+        }
+
+        [Test]
+        public void SumRealNumbers()
+        {
+            var source = new List<IFuzzyNumber>
+                {
+                    new RealNumber(2),
+                    new RealNumber(3),
+                };
+
+            var result = FuzzyNumberExtensions.Sum(0, source.Count, i => source.ElementAt(i).Mul(1.0));
+
+            Assert.That(result.GetMod().X, Is.EqualTo(5.0));
         }
     }
 }

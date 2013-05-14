@@ -14,15 +14,15 @@ namespace NeuroNet.Model.Net
         private readonly ILayer _output;
         private readonly List<ILink> _outputSignals = new List<ILink>();
 
-        public SimpleFuzzyNet(int inputNeuronsCount, int hiddenNeuronsCount, int outputNeuronsCount = 1, int levelsCount = 100)
+        public SimpleFuzzyNet(int inputNeuronsCount, int hiddenNeuronsCount, Func<IFuzzyNumber> littleFuzzyNumberGenerator, int outputNeuronsCount = 1, int levelsCount = 100)
         {
             for (int i = 0; i < inputNeuronsCount; i++)
             {
                 var inputSignal = new Link();
                 _inputSignals.Add(inputSignal);
             }
-            _hidden = new Layer(hiddenNeuronsCount, levelsCount);
-            _output = new Layer(outputNeuronsCount, levelsCount);
+            _hidden = new Layer(hiddenNeuronsCount, levelsCount, littleFuzzyNumberGenerator);
+            _output = new Layer(outputNeuronsCount, levelsCount, littleFuzzyNumberGenerator);
             Layers = new List<ILayer>{_hidden, _output};
             for (int i = 0; i < outputNeuronsCount; i++)
             {

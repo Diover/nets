@@ -8,9 +8,8 @@ namespace NeuroNet.Model.Net
     [Serializable]
     public class FuzzyNeuron : IFuzzyNeuron
     {
-        private readonly Func<double, double> _f = x => 1.0/(1.0 + Math.Pow(Math.E, -x));
-
-        private readonly int _levelsCount;
+        private readonly Func<double, double> _f = x => 1.0/(1.0 + Math.Pow(Math.E, -0.5*x));
+        private readonly Func<IFuzzyNumber> _generateLittleFuzzyNumber;
         private readonly List<ILink> _inputs = new List<ILink>();
         private readonly List<ILink> _weights = new List<ILink>();
         private ILink _output;
@@ -18,19 +17,19 @@ namespace NeuroNet.Model.Net
         [NonSerialized] private IFuzzyNumber _propagatedError;
         [NonSerialized] private readonly List<ILink> _weightsDeltas = new List<ILink>();
         [NonSerialized] private readonly List<double> _weightsLambdas = new List<double>();
-        private const double _defaultWeightLambda = 0.000001;
+        private const double _defaultWeightLambda = 1.0;
 
-        public FuzzyNeuron(int levelsCount)
+        public FuzzyNeuron(Func<IFuzzyNumber> littleFuzzyNumberGenerator)
         {
             _propagatedError = null;
-            _levelsCount = levelsCount;
+            _generateLittleFuzzyNumber = littleFuzzyNumberGenerator;
         }
 
-        public FuzzyNeuron(Func<double, double> f, int levelsCount)
+        public FuzzyNeuron(Func<double, double> f, Func<IFuzzyNumber> littleFuzzyNumberGenerator)
         {
             _propagatedError = null;
             _f = f;
-            _levelsCount = levelsCount;
+            _generateLittleFuzzyNumber = littleFuzzyNumberGenerator;
         }
 
         public IFuzzyNumber LastOutput { get { return _output.Signal; } }
@@ -41,6 +40,7 @@ namespace NeuroNet.Model.Net
             foreach (var weight in _weights)
             {
                 action(i, weight);
+                i++;
             }
         }
 
@@ -78,7 +78,7 @@ namespace NeuroNet.Model.Net
         public void AddInput(ILink link)
         {
             _inputs.Add(link);
-            _weights.Add(new Link(DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: _levelsCount)));
+            _weights.Add(new Link(generateLittleFuzzyNumber()));
             _weightsDeltas.Add(new Link());
             _weightsLambdas.Add(_defaultWeightLambda);
         }

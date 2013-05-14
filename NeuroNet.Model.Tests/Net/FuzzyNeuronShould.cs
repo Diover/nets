@@ -23,7 +23,7 @@ namespace NeuroNet.Model.Tests.Net
             var output = new Link();
             var f = new Func<double, double>(x => 1.0 / (1.0 + Math.Pow(Math.E, -x)));
 
-            var neuron = new FuzzyNeuron(f, 3);
+            var neuron = new FuzzyNeuron(f, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3));
             neuron.AddInput(input, weight);
             neuron.SetOutput(output);
             
