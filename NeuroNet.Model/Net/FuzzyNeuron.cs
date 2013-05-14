@@ -17,6 +17,8 @@ namespace NeuroNet.Model.Net
 
         [NonSerialized] private IFuzzyNumber _propagatedError;
         [NonSerialized] private readonly List<ILink> _weightsDeltas = new List<ILink>();
+        [NonSerialized] private readonly List<double> _weightsLambdas = new List<double>();
+        private const double _defaultWeightLambda = 0.000001;
 
         public FuzzyNeuron(int levelsCount)
         {
@@ -63,11 +65,22 @@ namespace NeuroNet.Model.Net
             return _inputs.ElementAt(i);
         }
 
+        public void SetWeightLambda(int i, double newValue)
+        {
+            _weightsLambdas[i] = newValue;
+        }
+
+        public double GetWeightLambda(int i)
+        {
+            return _weightsLambdas.ElementAt(i);
+        }
+
         public void AddInput(ILink link)
         {
             _inputs.Add(link);
             _weights.Add(new Link(DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: _levelsCount)));
             _weightsDeltas.Add(new Link());
+            _weightsLambdas.Add(_defaultWeightLambda);
         }
 
         public void AddInput(ILink link, IFuzzyNumber weight)
@@ -75,6 +88,7 @@ namespace NeuroNet.Model.Net
             _inputs.Add(link);
             _weights.Add(new Link(weight));
             _weightsDeltas.Add(new Link());
+            _weightsLambdas.Add(_defaultWeightLambda);
         }
 
         public void SetOutput(ILink link)

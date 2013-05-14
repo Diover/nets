@@ -17,5 +17,7 @@ namespace NeuroNet.Model.Net
         ILink GetWeightDelta(int i);
         void ForeachWeight(Action<int, ILink> action);
         ILink GetLastInput(int i);
+        void SetWeightLambda(int i, double newValue);
+        double GetWeightLambda(int i);
     }
 }
