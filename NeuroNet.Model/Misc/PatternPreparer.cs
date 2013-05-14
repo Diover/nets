@@ -1,23 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NeuroNet.Model.FuzzyNumbers;
 using NeuroNet.Model.Net.LearningAlgorithm;
 
 namespace NeuroNet.Model.Misc
 {
     public class TestPatternPreparer: IPatternPreparer
     {
+        private readonly INumberParser _parser;
         private readonly List<ILearningPattern> _patterns;
 
-        public TestPatternPreparer(string filename)
+        public TestPatternPreparer(string filename, INumberParser parser)
         {
+            _parser = parser;
             _patterns = Load(filename);
         }
 
-        private static List<ILearningPattern> Load(string filename)
+        private List<ILearningPattern> Load(string filename)
         {
             var result = new List<ILearningPattern>();
 
@@ -37,7 +36,7 @@ namespace NeuroNet.Model.Misc
             return result;
         }
 
-        private static LearningPattern ParseLine(string line)
+        private LearningPattern ParseLine(string line)
         {
             int inputOutputSeparator = line.IndexOf(' ');
             string inputsPart = line.Substring(0, inputOutputSeparator);
@@ -48,27 +47,11 @@ namespace NeuroNet.Model.Misc
 
             const char numbersSeparator = ';';
             var inputsNumbers = inputsPart.Split(numbersSeparator);
-            var inputs = inputsNumbers.Select(ParseSrtingWithFuzzyNumber).ToList();
+            var inputs = inputsNumbers.Select(_parser.Parse).ToList();
             var outputsNumbers = outputsPart.Split(numbersSeparator);
-            var outputs = outputsNumbers.Select(ParseSrtingWithFuzzyNumber).ToList();
+            var outputs = outputsNumbers.Select(_parser.Parse).ToList();
 
             return new LearningPattern(inputs, outputs);
-        }
-
-        private static IFuzzyNumber ParseSrtingWithFuzzyNumber(string lineWithNumber)
-        {
-            const char doublesSeparator = ',';
-            var stringWithDoubles = lineWithNumber.Split(doublesSeparator);
-            var doubles = stringWithDoubles.Select(s=>double.Parse(s, CultureInfo.InvariantCulture));
-
-            if (doubles.Count() != 3)
-                return null;
-
-            var left = doubles.ElementAt(0);
-            var mod = doubles.ElementAt(1);
-            var right = doubles.ElementAt(2);
-
-            return new DiscreteFuzzyNumber(new TriangularFuzzyFunction(left, mod, right), 11);
         }
 
         public List<ILearningPattern> PreparePatterns()

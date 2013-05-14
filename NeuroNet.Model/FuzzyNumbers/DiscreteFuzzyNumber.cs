@@ -144,31 +144,6 @@ namespace NeuroNet.Model.FuzzyNumbers
             return Operation((a, b) => a*b, this, y);
         }
 
-        private static IFuzzyNumber MultiplyNegativeByNegative(IFuzzyNumber x, IFuzzyNumber y)
-        {
-            //(x + p)*(y + d) -> (xy + py + xd + pd) - xd - py - pd
-
-            var p = 0.0 - x.GetAlphaLevel(0.0).X + 1;
-            var py = y.Mul(p);
-
-            var d = 0.0 - y.GetAlphaLevel(0.0).X + 1;
-            var dx = x.Mul(d);
-
-            var pd = p*d;
-
-            return x.Sum(p).Mul(y.Sum(d)).Sub(py).Sub(dx).Sub(pd);
-
-        }
-
-        private static IFuzzyNumber MultiplyLeftPositiveByZeroOrNegative(IFuzzyNumber x, IFuzzyNumber y)
-        {
-            //x*(y + d) -> (xy + xd) - xd
-            var d = 0.0 - y.GetAlphaLevel(0.0).X + 1;
-            var dx = x.Mul(d);
-
-            return y.Sum(d).Mul(x).Sub(dx);
-        }
-
         private static IFuzzyNumber Operation(Func<double, double, double> f, IFuzzyNumber y, IFuzzyNumber x)
         {
             var resultLevels = new Dictionary<double, IntervalD>();
@@ -247,12 +222,6 @@ namespace NeuroNet.Model.FuzzyNumbers
             if(Math.Abs(factor - 0.0) < Epsilon)
                 throw new DivideByZeroException("factor is equal to 0.0");
             var resultLevels = _alphaLevels.ToDictionary(level => level.Key, level => new IntervalD(level.Value.X / factor, level.Value.Y / factor));
-            return new DiscreteFuzzyNumber(resultLevels);
-        }
-
-        public IFuzzyNumber Operation(Func<double, double, double> f, double factor)
-        {
-            var resultLevels = _alphaLevels.ToDictionary(level => level.Key, level => new IntervalD(f(factor, level.Value.X), f(factor, level.Value.Y)));
             return new DiscreteFuzzyNumber(resultLevels);
         }
 

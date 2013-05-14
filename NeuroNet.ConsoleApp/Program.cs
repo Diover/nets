@@ -18,8 +18,8 @@ namespace NeuroNet.ConsoleApp
             const int inputsCount = 2;
             const int hiddenNeuronsCount = 1;
             var net = new SimpleFuzzyNet(inputsCount, hiddenNeuronsCount, levelsCount: 11);
-
-            var patterns = new TestPatternPreparer("testPatterns.txt").PreparePatterns();
+            var patterns = new TestPatternPreparer("testPatterns.txt", new FuzzyNumberParser()).PreparePatterns();
+            //var patterns = new TestPatternPreparer("testPatternsReal.txt", new RealNumberParser()).PreparePatterns();
 
             var bp = new BackPropagation(patterns);
             bp.CyclePerformed +=
