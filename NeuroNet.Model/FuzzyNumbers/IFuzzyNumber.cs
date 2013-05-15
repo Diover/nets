@@ -19,7 +19,6 @@ namespace NeuroNet.Model.FuzzyNumbers
         bool ContainsAlphaLevel(double alpha);
         int LevelsCount { get; }
         void ForeachLevel(Action<double, IntervalD> action);
-        IFuzzyNumber Operation(Func<double, double, double> f, double factor);
         IFuzzyNumber Apply(Func<double, double> f);
     }
 }
