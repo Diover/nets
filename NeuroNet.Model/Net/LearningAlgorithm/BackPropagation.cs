@@ -15,23 +15,18 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         private readonly double _pulseConstant; //beta (b)
         private readonly double _errorThreshold; //Emax
 
-        private List<IFuzzyNumber> _outputNeuronsErrors;
-        private List<IFuzzyNumber> _hiddenNeuronsErrors;
-
         public BackPropagation(List<ILearningPattern> patterns, double learningRate = 0.7, double pulseConstant = 0.5, double errorThreshold = 0.0001)
         {
             _patterns = patterns;
             _learningRate = learningRate;
             _pulseConstant = pulseConstant;
             _errorThreshold = errorThreshold;
-
-            _outputNeuronsErrors = new List<IFuzzyNumber>();
-            _hiddenNeuronsErrors = new List<IFuzzyNumber>();
         }
 
         public void LearnNet(INet net)
         {
             double learningCycleError;
+            double previousLearningCycleError = 0.0;
             int cycle = 0;
             do
             {
@@ -47,16 +42,36 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     if (patternError > 0.0)
                     {
                         PropagateErrorOnLayers(net.Layers, learningPattern.Output);
-                        ChangeWeights(net.Layers);
+                        ChangeWeights(net.Layers, patternError,
+                                      () => CalculatePatternError(net,
+                                                                  learningPattern.Input,
+                                                                  learningPattern.Output));
                     }
+
+                    var error = CalculatePatternError(net,
+                                                             learningPattern.Input,
+                                                             learningPattern.Output);
 
                     OnStepPerformed(cycle, step, learningCycleError);
                     step++;
                 }
+                //if (learningCycleError <= previousLearningCycleError)
+                //    if (_learningRate < 0.5)
+                //        _learningRate *= 2;
+                //    else if(_learningRate > 0.01)
+                //        _learningRate /= 2;
+                //if (Math.Abs(previousLearningCycleError - learningCycleError) < 0.0000000001)
+                //    AddLittleCorrectionToWeights(net.Layers);
 
+                previousLearningCycleError = learningCycleError;
+                //if(new Random().Next(2) == 0)
+                //    _learningRate *= 1.001;
+                //else
+                //    _learningRate /= 2;
                 OnCyclePerformed(cycle, learningCycleError);
                 cycle++;
             } while (learningCycleError > _errorThreshold);
+            int k = 0;
         }
 
         public event StepPerformedEventHandler StepPerformed;
@@ -92,7 +107,20 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return leftError/2.0 + rightError/2.0;
         }
 
-        private void ChangeWeights(List<ILayer> layers)
+        private void AddLittleCorrectionToWeights(List<ILayer> layers)
+        {
+            for (int i = 0; i < layers.Count; i++)
+            {
+                var layer = layers.ElementAt(i);
+                layer.ForeachNeuron((j, neuron) => neuron.ForeachWeight((k, weight) =>
+                {
+                    //weight.Signal = weight.Signal.Sum(DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 11));
+                    weight.Signal = weight.Signal.Sum(RealNumber.GenerateLittleNumber());
+                }));
+            }
+        }
+
+        private void ChangeWeights(List<ILayer> layers, double currentError, Func<double> calculateError)
         {
             for (int i = 0; i < layers.Count; i++)
             {
@@ -102,22 +130,37 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                 //2) w(k) = w(k) + dw(k)
                 layer.ForeachNeuron((j, neuron) => neuron.ForeachWeight((k, weight) =>
                     {
-                        var delta = neuron.GetWeightDelta(k);
-                        delta.Signal = CalculateNewDeltaForWeight(delta.Signal, neuron.PropagatedError,
+                        var lambda = neuron.GetWeightLambda(k);
+                        var newDelta = CalculateNewDeltaForWeight(neuron.PropagatedError,
                                                                   neuron.GetLastInput(k)
                                                                         .Signal);
-                        weight.Signal = weight.Signal.Sum(delta.Signal);
+                        //var delta = neuron.GetWeightDelta(k);
+                        //delta.Signal = newDelta.Mul(lambda);
+
+                        var oldWeight = weight.Signal;
+                        weight.Signal = oldWeight.Sum(newDelta.Mul(lambda));
+
+                        /*var er = calculateError();
+                        if (currentError >= er)
+                            if(lambda < 1000)
+                            lambda *= 2.0;
+                        else
+                            if(lambda > 0.0001)
+                            lambda /= 2.0;
+                        
+                        neuron.SetWeightLambda(k, lambda);
+                        weight.Signal = oldWeight.Sum(newDelta.Mul(lambda));*/
                     }));
             }
         }
 
-        private IFuzzyNumber CalculateNewDeltaForWeight(IFuzzyNumber weightDelta, IFuzzyNumber propagatedError, IFuzzyNumber output)
+        private static IFuzzyNumber CalculateNewDeltaForWeight(IFuzzyNumber propagatedError, IFuzzyNumber output)
         {
-            if (weightDelta == null)
-            {
-                return propagatedError.Mul(_learningRate).Mul(output);
-            }
-            return weightDelta.Mul(_pulseConstant).Sum(propagatedError.Mul(_learningRate).Mul(output));
+            //if (weightDelta == null)
+            //{
+                return propagatedError.Mul(output);
+            //}
+            //return weightDelta.Mul(_pulseConstant).Sum(propagatedError.Mul(_learningRate).Mul(output));
         }
 
         public static void PropagateErrorOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
