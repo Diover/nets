@@ -9,6 +9,7 @@ namespace NeuroNet.Model.FuzzyNumbers.Vectors
         IFuzzyNumber Mul(IVector x);
         IVector Mul(IFuzzyNumber x);
         IVector Mul(double x);
+        IVector MemberviseMul(IVector x);
         int Length { get; }
         IVector Negate();
         IVector Sum(IVector x);

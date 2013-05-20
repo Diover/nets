@@ -54,6 +54,19 @@ namespace NeuroNet.Model.FuzzyNumbers.Vectors
             return new Vector(values);
         }
 
+        public IVector MemberviseMul(IVector x)
+        {
+            if(Length != x.Length)
+                throw new ArgumentException("Vectors dimensions differ.");
+
+            var values = new IFuzzyNumber[Length];
+            for (int i = 0; i < _values.Length; i++)
+            {
+                values[i] = _values[i].Mul(x[i]);
+            }
+            return new Vector(values);
+        }
+
         public IVector Negate()
         {
             var values = new IFuzzyNumber[Length];
