@@ -15,25 +15,34 @@ namespace NeuroNet.ConsoleApp
         static void Main(string[] args)
         {
             const int inputsCount = 2;
-            const int hiddenNeuronsCount = 1;
+            const int hiddenNeuronsCount = 2;
             //var net = new SimpleFuzzyNet(inputsCount, hiddenNeuronsCount, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3) levelsCount: 11);
             var net = new SimpleFuzzyNet(inputsCount, hiddenNeuronsCount, RealNumber.GenerateLittleNumber);
             
             //var patterns = new TestPatternPreparer("testPatterns.txt", new FuzzyNumberParser()).PreparePatterns();
             var patterns = new TestPatternPreparer("testPatternsReal.txt", new RealNumberParser()).PreparePatterns();
 
-            //var bp = new BackPropagation(patterns);
-            var bp = new BackPropagationWithPseudoNeuton(patterns);
+           /* var bp = new BackPropagation(patterns);
+            bp.CyclePerformed +=
+                (state) =>
+                {
+                    //Console.ReadKey();
+                    if (state.Cycle % 100 == 0)
+                        Console.WriteLine("cycle: " + state.Cycle +
+                                          " error: " + state.CycleError.ToString("0.#####################"));
+                };*/
 
+            var bp = new BackPropagationWithPseudoNeuton(patterns);
             bp.CyclePerformed +=
                 (state) =>
                     {
                         //Console.ReadKey();
                         if (state.Cycle % 100 == 0)
                             Console.WriteLine("cycle: " + state.Cycle +
-                                              " error: " + state.CycleError.ToString("0.#####################") +
+                                              " error: " + state.CycleError.ToString("0.#########################") +
                                               " grad: " + state.GradientNorm.ToString());
                     };
+
             bp.LearnNet(net);
 
             BinaryFileSerializer.SaveNetState("LearnedNet.net", net);

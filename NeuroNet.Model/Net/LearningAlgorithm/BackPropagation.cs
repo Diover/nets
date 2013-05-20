@@ -13,27 +13,31 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
     public class BackPropagation : ILearningAlgorithm
     {
         private readonly List<ILearningPattern> _patterns;
-        private double _learningRate;  //eta (n)
-        private readonly double _pulseConstant; //beta (b)
+        private double _alpha;  //eta (n)
         private readonly double _errorThreshold; //Emax
+        private IVector _gradient;
+        private IVector _weights;
+        private List<ILink> _outputDeltas;
 
-        public BackPropagation(List<ILearningPattern> patterns, double learningRate = 0.7, double pulseConstant = 0.5, double errorThreshold = 0.0001)
+        public BackPropagation(List<ILearningPattern> patterns, double alpha = 0.7, double errorThreshold = 0.0001)
         {
             _patterns = patterns;
-            _learningRate = learningRate;
-            _pulseConstant = pulseConstant;
+            _alpha = alpha;
             _errorThreshold = errorThreshold;
         }
 
         public void LearnNet(INet net)
         {
+            _weights = CreateWeightsVector(net.Layers);
+            _outputDeltas = CreateOutputsDeltas(net.Layers);
+
             double learningCycleError;
             double previousLearningCycleError = 0.0;
             int cycle = 0;
             do
             {
                 learningCycleError = 0.0;
-                int step = 0;
+                int algoStep = 0;
                 foreach (var learningPattern in _patterns)
                 {
                     var patternError = CalculatePatternError(net,
@@ -43,33 +47,24 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
                     if (patternError > 0.0)
                     {
-                        CalculateGradientOnLayers(net.Layers, learningPattern.Output);
-                        ChangeWeights(net.Layers, patternError,
-                                      () => CalculatePatternError(net,
-                                                                  learningPattern.Input,
-                                                                  learningPattern.Output));
+                        _gradient = CalculateGradientOnLayers(net.Layers, learningPattern.Output);
+                        var direction = _gradient.Negate();
+                        CalculateStepAndChangeAlpha(direction, net.Layers, patternError,
+                                                    () => CalculatePatternError(net,
+                                                                                learningPattern.Input,
+                                                                                learningPattern.Output));
                     }
 
                     var error = CalculatePatternError(net,
                                                              learningPattern.Input,
                                                              learningPattern.Output);
 
-                    OnStepPerformed(cycle, step, learningCycleError);
-                    step++;
+                    OnStepPerformed(cycle, algoStep, learningCycleError);
+                    algoStep++;
                 }
-                //if (learningCycleError <= previousLearningCycleError)
-                //    if (_learningRate < 0.5)
-                //        _learningRate *= 2;
-                //    else if(_learningRate > 0.01)
-                //        _learningRate /= 2;
-                //if (Math.Abs(previousLearningCycleError - learningCycleError) < 0.0000000001)
-                //    AddLittleCorrectionToWeights(net.Layers);
 
                 previousLearningCycleError = learningCycleError;
-                //if(new Random().Next(2) == 0)
-                //    _learningRate *= 1.001;
-                //else
-                //    _learningRate /= 2;
+
                 OnCyclePerformed(cycle, learningCycleError);
                 cycle++;
             } while (learningCycleError > _errorThreshold);
@@ -122,66 +117,28 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             }
         }
 
-        private void ChangeWeights(List<ILayer> layers, double currentError, Func<double> calculateError)
+        private IVector CalculateStepAndChangeAlpha(IVector direction, List<ILayer> layers, double oldError, Func<double> calculateError)
         {
-            for (int i = 0; i < layers.Count; i++)
+            var oldWeights = _weights;
+            //can change alpha by minimizing it in f(xk + alpha*direction)
+            double error;
+            IVector step;
+            do
             {
-                var layer = layers.ElementAt(i);
-                //foreach neuron (j) foreach weight (k): 
-                //1) dw(k) = dw(k)*_b + error*_n*(input_of j)
-                //2) w(k) = w(k) + dw(k)
-                layer.ForeachNeuron((j, neuron) => neuron.ForeachWeight((k, weight) =>
-                    {
-                        var lambda = neuron.GetWeightLambda(k);
-                        var newDelta = CalculateNewDeltaForWeight(neuron.PropagatedError,
-                                                                  neuron.GetLastInput(k)
-                                                                        .Signal);
-                        //var delta = neuron.GetWeightDelta(k);
-                        //delta.Signal = newDelta.Mul(lambda);
+                step = direction.Mul(_alpha);
+                _weights = oldWeights.Sum(step);
+                SetWeights(_weights, layers);
 
-                        var oldWeight = weight.Signal;
-                        weight.Signal = oldWeight.Sum(newDelta.Mul(lambda));
+                error = calculateError();
+                if (Math.Abs(error - oldError) > _errorThreshold)
+                    _alpha /= 2.0;
 
-                        /*var er = calculateError();
-                        if (currentError >= er)
-                            if(lambda < 1000)
-                            lambda *= 2.0;
-                        else
-                            if(lambda > 0.0001)
-                            lambda /= 2.0;
-                        
-                        neuron.SetWeightLambda(k, lambda);
-                        weight.Signal = oldWeight.Sum(newDelta.Mul(lambda));*/
-                    }));
-            }
+            } while (Math.Abs(error - oldError) > _errorThreshold);
+
+            return step;
         }
 
-        private static IFuzzyNumber CalculateNewDeltaForWeight(IFuzzyNumber propagatedError, IFuzzyNumber output)
-        {
-            //if (weightDelta == null)
-            //{
-                return propagatedError.Mul(output);
-            //}
-            //return weightDelta.Mul(_pulseConstant).Sum(propagatedError.Mul(_learningRate).Mul(output));
-        }
-
-        private static IVector CreateMutableWeightsGradient(List<ILayer> layers)
-        {
-            var result = new List<IFuzzyNumber>();
-
-            var outputLayer = layers.Last();
-            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
-            var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers.Reverse())
-            {
-                hiddenLayer.ForeachNeuron(
-                    (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
-            }
-
-            return new Vector(result.ToArray());
-        }
-
-        private static IVector CreateMutableWeightsVector(List<ILayer> layers)
+        private static IVector CreateWeightsVector(List<ILayer> layers)
         {
             var result = new List<IFuzzyNumber>();
 
@@ -197,7 +154,59 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return new Vector(result.ToArray());
         }
 
-        public static void CalculateGradientOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
+        private static void SetWeights(IVector weights, List<ILayer> layers)
+        {
+            var queue = weights.ToQueue();
+
+            var outputLayer = layers.Last();
+            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => weight.Signal = queue.Dequeue()));
+            var hiddenLayers = layers.Take(layers.Count - 1);
+            foreach (var hiddenLayer in hiddenLayers.Reverse())
+            {
+                hiddenLayer.ForeachNeuron(
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => weight.Signal = queue.Dequeue()));
+            }
+        }
+
+        private static List<ILink> CreateOutputsDeltas(List<ILayer> layers)
+        {
+            var outputs = new List<ILink>();
+            
+            var outputLayer = layers.Last();
+            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
+            var hiddenLayers = layers.Take(layers.Count - 1);
+            foreach (var hiddenLayer in hiddenLayers.Reverse())
+            {
+                hiddenLayer.ForeachNeuron(
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
+            }
+
+            return outputs;
+        }
+
+        private IVector CreateWeightsGradient(List<ILayer> layers)
+        {
+            var result = new List<IFuzzyNumber>();
+
+            var outputLayer = layers.Last();
+            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
+            var hiddenLayers = layers.Take(layers.Count - 1);
+            foreach (var hiddenLayer in hiddenLayers.Reverse())
+            {
+                hiddenLayer.ForeachNeuron(
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
+            }
+
+            return new Vector(result.ToArray()).MemberviseMul(ToVector(_outputDeltas));
+        }
+
+        private static IVector ToVector(IEnumerable<ILink> links)
+        {
+            var res = links.Select(link => link.Signal).ToArray();
+            return new Vector(res);
+        }
+
+        public IVector CalculateGradientOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
         {
             var outputLayer = layers.Last();
             outputLayer.ForeachNeuron((i, neuron) =>
@@ -226,6 +235,8 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                         neuron.PropagatedError = part.Mul(sum);
                     });
             }
+
+            return CreateWeightsGradient(layers);
         }
     }
 }

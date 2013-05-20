@@ -16,6 +16,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         private IVector _weights;
         private IMatrix _b; //pseudo-Gessian
         private double _alpha;  //eta (n)
+        private List<ILink> _outputDeltas;
 
         public BackPropagationWithPseudoNeuton(List<ILearningPattern> patterns, double alpha = 10.7, double errorThreshold = 0.0001)
         {
@@ -28,6 +29,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         {
             _b = Matrix.CreateI(net.WeightsCount, net.WeightsCount, () => new RealNumber(1), () => new RealNumber(0)); //b0
             _weights = CreateWeightsVector(net.Layers); //x0
+            _outputDeltas = CreateOutputsDeltas(net.Layers);
 
             double learningCycleError;
             double previousLearningCycleError = 0.0;
@@ -52,9 +54,6 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                                                                                            learningPattern.Input,
                                                                                            learningPattern.Output));
                         
-                        _weights = _weights.Sum(step); //x(k+1) = xk + sk 
-                        SetWeights(_weights, net.Layers); //content of _weights now shared between net and _weights vector
-
                         var nextGradient = CalculateGradientOnLayers(net.Layers, learningPattern.Output); //nablaF(xk + 1)
                         var y = nextGradient.Sum(_gradient.Negate()); //yk
 
@@ -120,7 +119,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return leftError / 2.0 + rightError / 2.0;
         }
 
-        public static IVector CalculateGradientOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
+        public IVector CalculateGradientOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
         {
             var outputLayer = layers.Last();
             outputLayer.ForeachNeuron((i, neuron) =>
@@ -167,7 +166,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             }
         }
 
-        private static IVector CreateWeightsGradient(List<ILayer> layers)
+        private IVector CreateWeightsGradient(List<ILayer> layers)
         {
             var result = new List<IFuzzyNumber>();
 
@@ -180,7 +179,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
             }
 
-            return new Vector(result.ToArray());
+            return new Vector(result.ToArray()).MemberviseMul(ToVector(_outputDeltas));
         }
 
         private static IVector CreateWeightsVector(List<ILayer> layers)
@@ -204,6 +203,29 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return invertedPseudoGessian.Mul(gradient.Negate());
         }
 
+        private static List<ILink> CreateOutputsDeltas(List<ILayer> layers)
+        {
+            var outputs = new List<ILink>();
+
+            var outputLayer = layers.Last();
+            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
+            var hiddenLayers = layers.Take(layers.Count - 1);
+            foreach (var hiddenLayer in hiddenLayers.Reverse())
+            {
+                hiddenLayer.ForeachNeuron(
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
+            }
+
+            return outputs;
+        }
+
+        private static IVector ToVector(IEnumerable<ILink> links)
+        {
+            var res = links.Select(link => link.Signal).ToArray();
+            return new Vector(res);
+        }
+
+
         private IVector CalculateStepAndChangeAlpha(IVector direction, List<ILayer> layers, double oldError, Func<double> calculateError)
         {
             var oldWeights = _weights;
@@ -213,15 +235,21 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             do
             {
                 step = direction.Mul(_alpha);
-                _weights = oldWeights.Sum(step);
-                SetWeights(_weights, layers);
+                _weights = oldWeights.Sum(step); //x(k+1) = xk + sk 
+                SetWeights(_weights, layers);   //content of _weights now shared between net and _weights vector
 
                 error = calculateError();
                 if (Math.Abs(error - oldError) > _errorThreshold)
                     _alpha /= 2.0;
 
             } while (Math.Abs(error - oldError) > _errorThreshold);
-            
+
+            if (Math.Abs(error - oldError) > _errorThreshold)
+            {
+                _weights = oldWeights;
+                SetWeights(_weights, layers);
+            }
+
             return step;
         }
     }

@@ -12,8 +12,6 @@ namespace NeuroNet.Model.Tests.Net.LearningAlgorithm
         [Test, Timeout(2000)]
         public void ReturnZeroErrorOnPatternsSameAsOutput()
         {
-            var levelsCount = 3;
-            const double errorThreshold = 0.5;
             var patternA = new LearningPattern
                 {
                     Input = new List<IFuzzyNumber>
@@ -36,7 +34,7 @@ namespace NeuroNet.Model.Tests.Net.LearningAlgorithm
                 Output = new List<IFuzzyNumber>()
             };
 
-            var bp = new BackPropagation(new List<ILearningPattern> { patternA, patternB }, 0.0, 0.0, errorThreshold);
+            var bp = new BackPropagation(new List<ILearningPattern> { patternA, patternB });
             var net = new SimpleFuzzyNet(3, 2, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3),
                                          levelsCount: 3);
 
