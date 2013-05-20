@@ -14,6 +14,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         private double _learningRate;  //eta (n)
         private readonly double _pulseConstant; //beta (b)
         private readonly double _errorThreshold; //Emax
+        private List<IFuzzyNumber> _mutableGradient;
 
         public BackPropagation(List<ILearningPattern> patterns, double learningRate = 0.7, double pulseConstant = 0.5, double errorThreshold = 0.0001)
         {
@@ -21,10 +22,13 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             _learningRate = learningRate;
             _pulseConstant = pulseConstant;
             _errorThreshold = errorThreshold;
+            _mutableGradient = new List<IFuzzyNumber>();
         }
 
         public void LearnNet(INet net)
         {
+            _mutableGradient = CreateMutableWeightsGradient(net.Layers);
+
             double learningCycleError;
             double previousLearningCycleError = 0.0;
             int cycle = 0;
@@ -41,7 +45,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
                     if (patternError > 0.0)
                     {
-                        CalculateGradientsOnLayers(net.Layers, learningPattern.Output);
+                        CalculateGradientOnLayers(net.Layers, learningPattern.Output);
                         ChangeWeights(net.Layers, patternError,
                                       () => CalculatePatternError(net,
                                                                   learningPattern.Input,
@@ -163,7 +167,23 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             //return weightDelta.Mul(_pulseConstant).Sum(propagatedError.Mul(_learningRate).Mul(output));
         }
 
-        public static void CalculateGradientsOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
+        private static List<IFuzzyNumber> CreateMutableWeightsGradient(List<ILayer> layers)
+        {
+            var result = new List<IFuzzyNumber>();
+
+            var outputLayer = layers.Last();
+            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
+            var hiddenLayers = layers.Take(layers.Count - 1);
+            foreach (var hiddenLayer in hiddenLayers)
+            {
+                hiddenLayer.ForeachNeuron(
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
+            }
+
+            return result;
+        }
+
+        public static void CalculateGradientOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
         {
             var outputLayer = layers.Last();
             outputLayer.ForeachNeuron((i, neuron) =>
