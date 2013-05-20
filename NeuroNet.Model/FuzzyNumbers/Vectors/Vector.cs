@@ -1,4 +1,6 @@
-﻿namespace NeuroNet.Model.FuzzyNumbers.Vectors
+﻿using System.Collections.Generic;
+
+namespace NeuroNet.Model.FuzzyNumbers.Vectors
 {
     public class Vector : IVector
     {
@@ -38,6 +40,48 @@
                 values[i] = _values[i].Mul(x);
             }
             return new Vector(values);
+        }
+
+        public IVector Mul(double x)
+        {
+            var values = new IFuzzyNumber[Length];
+            for (int i = 0; i < _values.Length; i++)
+            {
+                values[i] = _values[i].Mul(x);
+            }
+            return new Vector(values);
+        }
+
+        public IVector Negate()
+        {
+            var values = new IFuzzyNumber[Length];
+            for (int i = 0; i < _values.Length; i++)
+            {
+                values[i] = _values[i].Negate();
+            }
+            return new Vector(values);
+        }
+
+        public IVector Sum(IVector x)
+        {
+            var values = new IFuzzyNumber[Length];
+            for (int i = 0; i < _values.Length; i++)
+            {
+                values[i] = _values[i].Sum(x[i]);
+            }
+            return new Vector(values);
+        }
+
+        public Queue<IFuzzyNumber> ToQueue()
+        {
+            var result = new Queue<IFuzzyNumber>();
+
+            foreach (var t in _values)
+            {
+                result.Enqueue(t);
+            }
+
+            return result;
         }
 
         public int Length
