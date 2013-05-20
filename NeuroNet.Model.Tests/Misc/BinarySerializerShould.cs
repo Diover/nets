@@ -15,10 +15,10 @@ namespace NeuroNet.Model.Tests.Misc
         public void SaveAndLoadNetState()
         {
             const int inputsCount = 3;
-            var net = new SimpleFuzzyNet(inputsCount,
-                                         2,
-                                         levelsCount: 3, 
-                                         littleFuzzyNumberGenerator: () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3));
+            var net = new SimpleFuzzyNet(inputsCount, new[] {2},
+                                         levelsCount: 3,
+                                         littleFuzzyNumberGenerator:
+                                             () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3));
 
             var first = new DiscreteFuzzyNumber(new TriangularFuzzyFunction(-1, 0, 1), 3);
             var second = new DiscreteFuzzyNumber(new TriangularFuzzyFunction(-1, -0.5, 0), 3);

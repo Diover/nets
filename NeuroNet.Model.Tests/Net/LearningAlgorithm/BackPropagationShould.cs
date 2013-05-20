@@ -35,7 +35,7 @@ namespace NeuroNet.Model.Tests.Net.LearningAlgorithm
             };
 
             var bp = new BackPropagation(new List<ILearningPattern> { patternA, patternB });
-            var net = new SimpleFuzzyNet(3, 2, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3),
+            var net = new SimpleFuzzyNet(3, new[] {2}, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3),
                                          levelsCount: 3);
 
             patternA.Output = net.Propagate(patternA.Input);

@@ -11,13 +11,13 @@ namespace NeuroNet.Model.Tests.Net
         public void CorrectlyReturnNumberOfWeights()
         {
             const int inputs = 5;
-            const int hidden = 7;
+            var hidden = new[] {7, 2};
             const int output = 1;
             var net = new SimpleFuzzyNet(inputs, hidden, RealNumber.GenerateLittleNumber);
 
             var weightsCount = net.WeightsCount;
 
-            Assert.That(weightsCount, Is.EqualTo(inputs * hidden + hidden * output));
+            Assert.That(weightsCount, Is.EqualTo(inputs * hidden[0] + hidden[0] * hidden[1] + hidden[1] * output));
         }
     }
 }

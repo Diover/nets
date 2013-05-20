@@ -16,13 +16,13 @@ namespace NeuroNet.ConsoleApp
         {
             const int inputsCount = 2;
             const int hiddenNeuronsCount = 2;
-            //var net = new SimpleFuzzyNet(inputsCount, hiddenNeuronsCount, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3) levelsCount: 11);
-            var net = new SimpleFuzzyNet(inputsCount, hiddenNeuronsCount, RealNumber.GenerateLittleNumber);
+            //var net = new SimpleFuzzyNet(inputsCount, new[] {hiddenNeuronsCount}, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3) levelsCount: 11);
+            var net = new SimpleFuzzyNet(inputsCount, new[] {hiddenNeuronsCount}, RealNumber.GenerateLittleNumber);
             
             //var patterns = new TestPatternPreparer("testPatterns.txt", new FuzzyNumberParser()).PreparePatterns();
             var patterns = new TestPatternPreparer("testPatternsReal.txt", new RealNumberParser()).PreparePatterns();
 
-           /* var bp = new BackPropagation(patterns);
+            /*var bp = new BackPropagation(patterns);
             bp.CyclePerformed +=
                 (state) =>
                 {
