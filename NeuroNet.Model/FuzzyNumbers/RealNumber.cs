@@ -93,6 +93,11 @@ namespace NeuroNet.Model.FuzzyNumbers
             return new RealNumber(f(_value));
         }
 
+        public IFuzzyNumber Negate()
+        {
+            return Apply(x => -x);
+        }
+
         public static IFuzzyNumber GenerateLittleNumber()
         {
             var sign = new Random().Next(2);

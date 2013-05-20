@@ -20,5 +20,6 @@ namespace NeuroNet.Model.FuzzyNumbers
         int LevelsCount { get; }
         void ForeachLevel(Action<double, IntervalD> action);
         IFuzzyNumber Apply(Func<double, double> f);
+        IFuzzyNumber Negate();
     }
 }

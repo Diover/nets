@@ -230,6 +230,11 @@ namespace NeuroNet.Model.FuzzyNumbers
             return new DiscreteFuzzyNumber(resultLevels);
         }
 
+        public IFuzzyNumber Negate()
+        {
+            return Apply(x => -x);
+        }
+
         public override string ToString()
         {
             return _alphaLevels[0.0].X.ToString("0.################") + " | " +
