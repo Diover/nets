@@ -11,7 +11,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
     public class BackPropagation
     {
         private readonly List<ILearningPattern> _patterns;
-        private readonly double _learningRate;  //eta (n)
+        private double _learningRate;  //eta (n)
         private readonly double _pulseConstant; //beta (b)
         private readonly double _errorThreshold; //Emax
 
@@ -41,7 +41,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
                     if (patternError > 0.0)
                     {
-                        PropagateErrorOnLayers(net.Layers, learningPattern.Output);
+                        CalculateGradientsOnLayers(net.Layers, learningPattern.Output);
                         ChangeWeights(net.Layers, patternError,
                                       () => CalculatePatternError(net,
                                                                   learningPattern.Input,
@@ -163,7 +163,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             //return weightDelta.Mul(_pulseConstant).Sum(propagatedError.Mul(_learningRate).Mul(output));
         }
 
-        public static void PropagateErrorOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
+        public static void CalculateGradientsOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
         {
             var outputLayer = layers.Last();
             outputLayer.ForeachNeuron((i, neuron) =>
