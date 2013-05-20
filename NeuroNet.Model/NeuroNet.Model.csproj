@@ -75,6 +75,7 @@
     <Compile Include="Net\INet.cs" />
     <Compile Include="Net\LearningAlgorithm\BackPropagation.cs" />
     <Compile Include="Net\LearningAlgorithm\BackPropagationWithPseudoNeuton.cs" />
+    <Compile Include="Net\LearningAlgorithm\ILearningAlgorithm.cs" />
     <Compile Include="Net\LearningAlgorithm\ILearningPattern.cs" />
     <Compile Include="Net\LearningAlgorithm\INeuronWeightsChanger.cs" />
     <Compile Include="Net\Layer.cs" />

@@ -10,7 +10,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
     public delegate void StepPerformedEventHandler(int cycle, int step, double stepError);
     public delegate void CyclePerformedEventHandler(int cycle, double cycleError);
 
-    public class BackPropagation
+    public class BackPropagation : ILearningAlgorithm
     {
         private readonly List<ILearningPattern> _patterns;
         private double _learningRate;  //eta (n)

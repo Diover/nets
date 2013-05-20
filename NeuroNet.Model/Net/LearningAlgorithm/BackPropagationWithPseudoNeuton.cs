@@ -7,7 +7,7 @@ using NeuroNet.Model.FuzzyNumbers.Vectors;
 
 namespace NeuroNet.Model.Net.LearningAlgorithm
 {
-    public class BackPropagationWithPseudoNeuton
+    public class BackPropagationWithPseudoNeuton : ILearningAlgorithm
     {
         private readonly List<ILearningPattern> _patterns;
         private readonly double _errorThreshold; //Emax
