@@ -1,4 +1,5 @@
-﻿using NeuroNet.Model.FuzzyNumbers.Vectors;
+﻿using System;
+using NeuroNet.Model.FuzzyNumbers.Vectors;
 
 namespace NeuroNet.Model.FuzzyNumbers.Matrixes
 {
@@ -36,11 +37,6 @@ namespace NeuroNet.Model.FuzzyNumbers.Matrixes
             get { return _values[0].Length; }
         }
 
-        public IMatrix Mul(IMatrix x)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public IMatrix Sum(IMatrix x)
         {
             var values = new IFuzzyNumber[Rows][];
@@ -73,7 +69,15 @@ namespace NeuroNet.Model.FuzzyNumbers.Matrixes
 
         public IVector Mul(IVector x)
         {
-            
+            if(x.Length != Columns)
+                throw new ArgumentException("Vector and matrix dimensions are different");
+
+            var result = new Vector(Rows);
+
+            for (int i = 0; i < result.Length; i++)
+                result[i] = x.Mul(new Vector(_values[i]));
+
+            return result;
         }
 
         public IMatrix Mul(IFuzzyNumber x)

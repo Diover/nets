@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using NeuroNet.Model.FuzzyNumbers;
 using NeuroNet.Model.FuzzyNumbers.Matrixes;
+using NeuroNet.Model.FuzzyNumbers.Vectors;
 
 namespace NeuroNet.Model.Tests.FuzzyNumbers.Matrixes
 {
@@ -188,6 +189,35 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers.Matrixes
             for (int i = 0; i < matrix.Rows; i++)
                 for (int j = 0; j < matrix.Columns; j++)
                     Assert.That(result[i, j].GetMod().X, Is.EqualTo(results[i][j].GetMod().X));
+        }
+
+        [Test]
+        public void CorrectlyMultiplyByVector()
+        {
+            var values = new[]
+                {
+                    new[] {new RealNumber(1.0), new RealNumber(2.0), new RealNumber(3.0)},
+                    new[] {new RealNumber(1.0), new RealNumber(2.0), new RealNumber(3.0)},
+                    new[] {new RealNumber(0.0), new RealNumber(0.0), new RealNumber(4.0)},
+                    new[] {new RealNumber(0.0), new RealNumber(1.0), new RealNumber(0.0)},
+                };
+            var matrix = new Matrix(values);
+            var vector =
+                new Vector(new[]
+                    {
+                        new RealNumber(1.0), new RealNumber(2.0), new RealNumber(1.0)
+                    });
+
+            var expected = new[]
+                {
+                    new RealNumber(8.0), new RealNumber(8.0), new RealNumber(4.0), new RealNumber(2.0)
+                };
+
+            var result = matrix.Mul(vector);
+
+            Assert.That(result.Length, Is.EqualTo(matrix.Rows));
+            for (int i = 0; i < result.Length; i++)
+                Assert.That(result[i].GetMod().X, Is.EqualTo(expected[i].GetMod().X));
         }
     }
 }

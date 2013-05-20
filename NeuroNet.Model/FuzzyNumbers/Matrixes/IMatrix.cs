@@ -8,7 +8,6 @@ namespace NeuroNet.Model.FuzzyNumbers.Matrixes
         int Rows { get; }
         int Columns { get; }
 
-        IMatrix Mul(IMatrix x);
         IMatrix Sum(IMatrix x);
         IMatrix Sub(IMatrix x);
 
