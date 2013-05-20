@@ -13,6 +13,7 @@ namespace NeuroNet.Model.FuzzyNumbers.Vectors
         IVector Negate();
         IVector Sum(IVector x);
         IMatrix OuterMul(IVector x);
+        IFuzzyNumber Norm { get; }
 
         Queue<IFuzzyNumber> ToQueue();
     }
