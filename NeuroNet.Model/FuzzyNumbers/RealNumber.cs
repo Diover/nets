@@ -2,6 +2,7 @@
 
 namespace NeuroNet.Model.FuzzyNumbers
 {
+    [Serializable]
     public class RealNumber : IFuzzyNumber
     {
         private double _value;
