@@ -219,5 +219,65 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers.Matrixes
             for (int i = 0; i < result.Length; i++)
                 Assert.That(result[i].GetMod().X, Is.EqualTo(expected[i].GetMod().X));
         }
+
+        [Test]
+        public void CorrectlyDivideByFuzzyNumber()
+        {
+            var values = new[]
+                {
+                    new[] {new RealNumber(1.0), new RealNumber(2.0), new RealNumber(3.0)},
+                    new[] {new RealNumber(1.0), new RealNumber(2.0), new RealNumber(3.0)},
+                    new[] {new RealNumber(0.0), new RealNumber(0.0), new RealNumber(4.0)},
+                    new[] {new RealNumber(0.0), new RealNumber(1.0), new RealNumber(0.0)},
+                };
+            var matrix = new Matrix(values);
+            var denominator = new RealNumber(-2.0);
+            var expected = new[]
+                {
+                    new[] {new RealNumber(-0.5), new RealNumber(-1.0), new RealNumber(-1.5)},
+                    new[] {new RealNumber(-0.5), new RealNumber(-1.0), new RealNumber(-1.5)},
+                    new[] {new RealNumber(0.0), new RealNumber(0.0), new RealNumber(-2.0)},
+                    new[] {new RealNumber(0.0), new RealNumber(-0.5), new RealNumber(0.0)},
+                };
+
+            var result = matrix.Div(denominator);
+
+            for (int i = 0; i < matrix.Rows; i++)
+                for (int j = 0; j < matrix.Columns; j++)
+                    Assert.That(result[i, j].GetMod().X, Is.EqualTo(expected[i][j].GetMod().X));
+        }
+
+        [Test]
+        public void CorrectlyMulMatrixes()
+        {
+            var valuesX = new[]
+                {
+                    new[] {new RealNumber(1.0), new RealNumber(2.0), new RealNumber(3.0)},
+                    new[] {new RealNumber(-1.0), new RealNumber(2.0), new RealNumber(3.0)},
+                    new[] {new RealNumber(1.0), new RealNumber(2.0), new RealNumber(3.0)},
+                    new[] {new RealNumber(1.0), new RealNumber(2.0), new RealNumber(3.0)},
+                };
+            var matrixX = new Matrix(valuesX);
+            var valuesY = new[]
+                {
+                    new[] {new RealNumber(1.0), new RealNumber(2.0)},
+                    new[] {new RealNumber(1.0), new RealNumber(2.0)},
+                    new[] {new RealNumber(1.0), new RealNumber(2.0)},
+                };
+            var matrixY = new Matrix(valuesY);
+            var results = new[]
+                {
+                    new[] {new RealNumber(6.0), new RealNumber(12.0)},
+                    new[] {new RealNumber(4.0), new RealNumber(8.0)},
+                    new[] {new RealNumber(6.0), new RealNumber(12.0)},
+                    new[] {new RealNumber(6.0), new RealNumber(12.0)},
+                };
+
+            var result = matrixX.Mul(matrixY);
+
+            for (int i = 0; i < matrixX.Rows; i++)
+                for (int j = 0; j < matrixY.Columns; j++)
+                    Assert.That(result[i, j].GetMod().X, Is.EqualTo(results[i][j].GetMod().X));
+        }
     }
 }
