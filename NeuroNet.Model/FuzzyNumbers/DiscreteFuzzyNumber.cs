@@ -235,6 +235,11 @@ namespace NeuroNet.Model.FuzzyNumbers
             return Apply(x => -x);
         }
 
+        public bool IsGreater(double x)
+        {
+            return GetMod().X > x;
+        }
+
         public override string ToString()
         {
             return _alphaLevels[0.0].X.ToString("0.################") + " | " +
