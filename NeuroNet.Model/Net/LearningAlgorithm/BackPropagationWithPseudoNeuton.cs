@@ -58,7 +58,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                         var y = nextGradient.Sum(_gradient.Negate()); //yk
 
                         //its time to calculate b(k + 1)
-                        b = CalculateInvertedPseudoGaussian(_b, step, y);
+                        _b = CalculateInvertedPseudoGaussian(_b, step, y);
                     }
 
                     OnStepPerformed(cycle, algorithmStep, learningCycleError);
