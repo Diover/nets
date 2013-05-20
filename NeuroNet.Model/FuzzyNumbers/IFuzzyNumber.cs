@@ -21,5 +21,7 @@ namespace NeuroNet.Model.FuzzyNumbers
         void ForeachLevel(Action<double, IntervalD> action);
         IFuzzyNumber Apply(Func<double, double> f);
         IFuzzyNumber Negate();
+
+        bool IsGreater(double x);
     }
 }

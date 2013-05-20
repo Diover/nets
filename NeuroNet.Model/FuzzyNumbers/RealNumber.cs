@@ -98,6 +98,11 @@ namespace NeuroNet.Model.FuzzyNumbers
             return Apply(x => -x);
         }
 
+        public bool IsGreater(double x)
+        {
+            return _value > x;
+        }
+
         public static IFuzzyNumber GenerateLittleNumber()
         {
             var sign = new Random().Next(2);
