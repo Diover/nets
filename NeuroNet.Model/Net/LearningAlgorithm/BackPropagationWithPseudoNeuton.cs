@@ -58,7 +58,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                         var y = nextGradient.Sum(_gradient.Negate()); //yk
 
                         //its time to calculate b(k + 1)
-
+                        b = CalculateInvertedPseudoGaussian(_b, step, y);
                     }
 
                     OnStepPerformed(cycle, algorithmStep, learningCycleError);
@@ -68,6 +68,22 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                 OnCyclePerformed(cycle, learningCycleError);
                 cycle++;
             } while (learningCycleError > _errorThreshold);
+        }
+
+        private static IMatrix CalculateInvertedPseudoGaussian(IMatrix b, IVector s, IVector y)
+        {
+            var syNumber = s.Mul(y);
+            
+            var syNumberSqr = syNumber.Mul(syNumber);
+            var yByNumber = y.Mul(b.Mul(y));
+            var ssMatrix = s.OuterMul(s);
+            var second = ssMatrix.Mul(syNumber.Sum(yByNumber)).Div(syNumberSqr);
+
+            var ysMatrix = y.OuterMul(s);
+            var syMatrix = s.OuterMul(y);
+            var third = b.Mul(ysMatrix).Sum(syMatrix.Mul(b)).Div(syNumber);
+
+            return b.Sum(second).Sub(third);
         }
 
         public event StepPerformedEventHandler StepPerformed;
