@@ -94,5 +94,17 @@ namespace NeuroNet.Model.FuzzyNumbers.Matrixes
 
             return new Matrix(values);
         }
+
+        public static IMatrix CreateI(int rows, int columns, Func<IFuzzyNumber> primeGenerator, Func<IFuzzyNumber> zeroGenerator)
+        {
+            var result = new Matrix(rows, columns);
+            for (int i = 0; i < result.Rows; i++)
+                for (int j = 0; j < result.Columns; j++)
+                    if (i == j)
+                        result[i, j] = primeGenerator();
+                    else
+                        result[i, j] = zeroGenerator();
+            return result;
+        }
     }
 }
