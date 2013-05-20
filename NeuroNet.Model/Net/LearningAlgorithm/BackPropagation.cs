@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NeuroNet.Model.FuzzyNumbers;
+using NeuroNet.Model.FuzzyNumbers.Matrixes;
 using NeuroNet.Model.FuzzyNumbers.Vectors;
 
 namespace NeuroNet.Model.Net.LearningAlgorithm
@@ -15,8 +16,6 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         private double _learningRate;  //eta (n)
         private readonly double _pulseConstant; //beta (b)
         private readonly double _errorThreshold; //Emax
-        private IVector _gradient;
-        private IVector _weights;
 
         public BackPropagation(List<ILearningPattern> patterns, double learningRate = 0.7, double pulseConstant = 0.5, double errorThreshold = 0.0001)
         {
@@ -28,9 +27,6 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
         public void LearnNet(INet net)
         {
-            _gradient = CreateMutableWeightsGradient(net.Layers);
-            _weights = CreateMutableWeightsVector(net.Layers);
-
             double learningCycleError;
             double previousLearningCycleError = 0.0;
             int cycle = 0;
