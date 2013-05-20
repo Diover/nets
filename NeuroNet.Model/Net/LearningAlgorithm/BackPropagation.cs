@@ -7,8 +7,8 @@ using NeuroNet.Model.FuzzyNumbers.Vectors;
 
 namespace NeuroNet.Model.Net.LearningAlgorithm
 {
-    public delegate void StepPerformedEventHandler(int cycle, int step, double stepError);
-    public delegate void CyclePerformedEventHandler(int cycle, double cycleError);
+    public delegate void StepPerformedEventHandler(StepState state);
+    public delegate void CyclePerformedEventHandler(StepState state);
 
     public class BackPropagation : ILearningAlgorithm
     {
@@ -82,13 +82,13 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         private void OnStepPerformed(int cycle, int step, double stepError)
         {
             if (StepPerformed != null)
-                StepPerformed(cycle, step, stepError);
+                StepPerformed(new StepState(cycle, step, stepError));
         }
 
         private void OnCyclePerformed(int cycle, double cycleError)
         {
             if (CyclePerformed != null)
-                CyclePerformed(cycle, cycleError);
+                CyclePerformed(new StepState(cycle, 0, cycleError));
         }
 
         private static double CalculatePatternError(INet net, List<IFuzzyNumber> patterns, List<IFuzzyNumber> outputs)

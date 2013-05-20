@@ -80,6 +80,7 @@
     <Compile Include="Net\LearningAlgorithm\INeuronWeightsChanger.cs" />
     <Compile Include="Net\Layer.cs" />
     <Compile Include="Net\LearningAlgorithm\LearningPattern.cs" />
+    <Compile Include="Net\LearningAlgorithm\StepState.cs" />
     <Compile Include="Net\Link.cs" />
     <Compile Include="Net\SimpleFuzzyNet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

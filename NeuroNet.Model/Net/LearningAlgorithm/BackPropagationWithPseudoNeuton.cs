@@ -17,7 +17,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         private IMatrix _b; //pseudo-Gessian
         private double _alpha;  //eta (n)
 
-        public BackPropagationWithPseudoNeuton(List<ILearningPattern> patterns, double alpha = 0.7, double errorThreshold = 0.0001)
+        public BackPropagationWithPseudoNeuton(List<ILearningPattern> patterns, double alpha = 10.7, double errorThreshold = 0.0001)
         {
             _patterns = patterns;
             _alpha = alpha;
@@ -47,9 +47,10 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     {
                         _gradient = CalculateGradientOnLayers(net.Layers, learningPattern.Output); //nablaF(xk)
                         var direction = CalculateMinimizeDirection(_b, _gradient);
-                        var step = CalculateStepAndChangeAlpha(direction, () => CalculatePatternError(net,
-                                                                                                      learningPattern.Input,
-                                                                                                      learningPattern.Output));
+                        var step = CalculateStepAndChangeAlpha(direction, net.Layers, patternError,
+                                                               () => CalculatePatternError(net,
+                                                                                           learningPattern.Input,
+                                                                                           learningPattern.Output));
                         
                         _weights = _weights.Sum(step); //x(k+1) = xk + sk 
                         SetWeights(_weights, net.Layers); //content of _weights now shared between net and _weights vector
@@ -61,13 +62,13 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                         _b = CalculateInvertedPseudoGaussian(_b, step, y);
                     }
 
-                    OnStepPerformed(cycle, algorithmStep, learningCycleError);
+                    OnStepPerformed(cycle, algorithmStep, learningCycleError, _gradient.Norm);
                     algorithmStep++;
                 }
 
-                OnCyclePerformed(cycle, learningCycleError);
+                OnCyclePerformed(cycle, learningCycleError, _gradient.Norm);
                 cycle++;
-            } while (learningCycleError > _errorThreshold);
+            } while (_gradient.Norm.IsGreater(_errorThreshold));
         }
 
         private static IMatrix CalculateInvertedPseudoGaussian(IMatrix b, IVector s, IVector y)
@@ -89,16 +90,16 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         public event StepPerformedEventHandler StepPerformed;
         public event CyclePerformedEventHandler CyclePerformed;
 
-        private void OnStepPerformed(int cycle, int step, double stepError)
+        private void OnStepPerformed(int cycle, int step, double stepError, IFuzzyNumber gradientNorm)
         {
             if (StepPerformed != null)
-                StepPerformed(cycle, step, stepError);
+                StepPerformed(new StepState(cycle, step, stepError, gradientNorm));
         }
 
-        private void OnCyclePerformed(int cycle, double cycleError)
+        private void OnCyclePerformed(int cycle, double cycleError, IFuzzyNumber gradientNorm)
         {
             if (CyclePerformed != null)
-                CyclePerformed(cycle, cycleError);
+                CyclePerformed(new StepState(cycle, 0, cycleError, gradientNorm));
         }
 
         private static double CalculatePatternError(INet net, List<IFuzzyNumber> inputs, List<IFuzzyNumber> outputs)
@@ -162,7 +163,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             foreach (var hiddenLayer in hiddenLayers.Reverse())
             {
                 hiddenLayer.ForeachNeuron(
-                    (i, neuron) => neuron.ForeachWeight((j, weight) => queue.Dequeue()));
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => weight.Signal = queue.Dequeue()));
             }
         }
 
@@ -203,10 +204,24 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return invertedPseudoGessian.Mul(gradient.Negate());
         }
 
-        private IVector CalculateStepAndChangeAlpha(IVector direction, Func<double> minimizedFunction)
+        private IVector CalculateStepAndChangeAlpha(IVector direction, List<ILayer> layers, double oldError, Func<double> calculateError)
         {
-            var step = direction.Mul(_alpha);
+            var oldWeights = _weights;
             //can change alpha by minimizing it in f(xk + alpha*direction)
+            double error;
+            IVector step;
+            do
+            {
+                step = direction.Mul(_alpha);
+                _weights = oldWeights.Sum(step);
+                SetWeights(_weights, layers);
+
+                error = calculateError();
+                if (Math.Abs(error - oldError) > _errorThreshold)
+                    _alpha /= 2.0;
+
+            } while (Math.Abs(error - oldError) > _errorThreshold);
+            
             return step;
         }
     }

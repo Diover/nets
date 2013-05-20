@@ -43,7 +43,7 @@ namespace NeuroNet.Model.Tests.Net.LearningAlgorithm
             patternA.Output = net.Propagate(patternA.Input);
             patternB.Output = net.Propagate(patternB.Input);
 
-            bp.StepPerformed += (cycle, step, error) => Assert.That(error, Is.EqualTo(0.0));
+            bp.StepPerformed += (state) => Assert.That(state.CycleError, Is.EqualTo(0.0));
             bp.LearnNet(net);
         }
     }

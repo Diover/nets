@@ -22,18 +22,30 @@ namespace NeuroNet.ConsoleApp
             //var patterns = new TestPatternPreparer("testPatterns.txt", new FuzzyNumberParser()).PreparePatterns();
             var patterns = new TestPatternPreparer("testPatternsReal.txt", new RealNumberParser()).PreparePatterns();
 
-            var bp = new BackPropagation(patterns);
+            //var bp = new BackPropagation(patterns);
+            var bp = new BackPropagationWithPseudoNeuton(patterns);
+
             bp.CyclePerformed +=
-                (cycle, error) =>
+                (state) =>
                     {
                         //Console.ReadKey();
-                        if (cycle%100 == 0)
-                            Console.WriteLine("cycle: " + cycle + 
-                                              " error: " + error.ToString("0.##########################################"));
+                        if (state.Cycle % 100 == 0)
+                            Console.WriteLine("cycle: " + state.Cycle +
+                                              " error: " + state.CycleError.ToString("0.#####################") +
+                                              " grad: " + state.GradientNorm.ToString());
                     };
             bp.LearnNet(net);
 
             BinaryFileSerializer.SaveNetState("LearnedNet.net", net);
+            
+            /*
+            var net = BinaryFileSerializer.LoadNetState("LearnedNet.net");
+            var patterns = new TestPatternPreparer("testPatternsReal.txt", new RealNumberParser()).PreparePatterns();
+            foreach (var pattern in patterns)
+            {
+                var o = net.Propagate(pattern.Input);
+            }*/
+            
             //var inputs = new List<IFuzzyNumber>();
             //for (int i = 0; i < inputsCount; i++)
             //    inputs.Add(DiscreteFuzzyNumber.GenerateLittleNumber());
