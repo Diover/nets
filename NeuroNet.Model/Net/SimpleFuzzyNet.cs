@@ -86,5 +86,16 @@ namespace NeuroNet.Model.Net
         {
             bp.LearnNet(this);
         }
+
+        public int WeightsCount
+        {
+            get
+            {
+                var count = 0;
+                Layers.ForEach(
+                    layer => layer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => count += 1)));
+                return count;
+            }
+        }
     }
 }

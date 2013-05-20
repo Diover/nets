@@ -59,6 +59,7 @@
     <Compile Include="Misc\TestPatternPreparerShould.cs" />
     <Compile Include="Net\FuzzyNeuronShould.cs" />
     <Compile Include="Net\LearningAlgorithm\BackPropagationShould.cs" />
+    <Compile Include="Net\SimpleFuzzyNetShould.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

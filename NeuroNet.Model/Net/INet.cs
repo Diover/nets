@@ -10,6 +10,7 @@ namespace NeuroNet.Model.Net
         List<IFuzzyNumber> Propagate(List<IFuzzyNumber> inputs);
         List<IFuzzyNumber> PropagateLastInput();
         List<IFuzzyNumber> LastOutput { get; }
-        List<ILayer> Layers { get; } 
+        List<ILayer> Layers { get; }
+        int WeightsCount { get; }
     }
 }
