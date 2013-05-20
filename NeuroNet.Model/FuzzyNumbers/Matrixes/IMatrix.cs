@@ -10,7 +10,9 @@ namespace NeuroNet.Model.FuzzyNumbers.Matrixes
 
         IMatrix Sum(IMatrix x);
         IMatrix Sub(IMatrix x);
-
+        IMatrix Mul(IMatrix x);
+        
+        IMatrix Div(IFuzzyNumber x);
         IVector Mul(IVector x);
         IMatrix Mul(IFuzzyNumber x);
     }

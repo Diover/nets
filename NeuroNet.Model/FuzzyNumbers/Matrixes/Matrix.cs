@@ -67,6 +67,43 @@ namespace NeuroNet.Model.FuzzyNumbers.Matrixes
             return new Matrix(values);
         }
 
+        public IMatrix Mul(IMatrix x)
+        {
+            if (Columns != x.Rows)
+                throw new ArgumentException("matrixes dimensions are different");
+
+            var values = new IFuzzyNumber[Rows][];
+            for (int i = 0; i < Rows; i++)
+            {
+                values[i] = new IFuzzyNumber[x.Columns];
+            }
+
+            for (int i = 0; i < Rows; i++)
+                for (int j = 0; j < x.Columns; j++)
+                {
+                    var locali = i;
+                    var localj = j;
+                    values[i][j] = FuzzyNumberExtensions.Sum(0, Columns, k => _values[locali][k].Mul(x[k, localj]));
+                }
+
+            return new Matrix(values);
+        }
+
+        public IMatrix Div(IFuzzyNumber x)
+        {
+            var values = new IFuzzyNumber[Rows][];
+            for (int i = 0; i < Rows; i++)
+            {
+                values[i] = new IFuzzyNumber[Columns];
+            }
+
+            for (int i = 0; i < Rows; i++)
+                for (int j = 0; j < Columns; j++)
+                    values[i][j] = _values[i][j].Div(x);
+
+            return new Matrix(values);
+        }
+
         public IVector Mul(IVector x)
         {
             if(x.Length != Columns)
