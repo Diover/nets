@@ -62,5 +62,26 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers.Vectors
 
             Assert.That(resultXY.GetMod().X, Is.EqualTo(resultYX.GetMod().X));
         }
+
+        [Test]
+        public void CorrectlyCalculateOuterProduct()
+        {
+            var valuesX = new[] { new RealNumber(1.0), new RealNumber(2.0), new RealNumber(3.0) };
+            IVector vectorX = new Vector(valuesX);
+            var valuesY = new[] { new RealNumber(1.0), new RealNumber(2.0)};
+            IVector vectorY = new Vector(valuesY);
+            var expected = new[]
+                {
+                    new[] {new RealNumber(1.0), new RealNumber(2.0)},
+                    new[] {new RealNumber(2.0), new RealNumber(4.0)},
+                    new[] {new RealNumber(3.0), new RealNumber(6.0)},
+                };
+
+            var result = vectorX.OuterMul(vectorY);
+
+            for (int i = 0; i < valuesX.Length; i++)
+                for (int j = 0; j < valuesY.Length; j++)
+                    Assert.That(result[i, j].GetMod().X, Is.EqualTo(expected[i][j].GetMod().X));
+        }
     }
 }

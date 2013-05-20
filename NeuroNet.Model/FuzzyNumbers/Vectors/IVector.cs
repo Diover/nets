@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using NeuroNet.Model.FuzzyNumbers.Matrixes;
 
 namespace NeuroNet.Model.FuzzyNumbers.Vectors
 {
@@ -11,6 +12,7 @@ namespace NeuroNet.Model.FuzzyNumbers.Vectors
         int Length { get; }
         IVector Negate();
         IVector Sum(IVector x);
+        IMatrix OuterMul(IVector x);
 
         Queue<IFuzzyNumber> ToQueue();
     }
