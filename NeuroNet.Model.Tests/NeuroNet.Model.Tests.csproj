@@ -50,9 +50,11 @@
   <ItemGroup>
     <Compile Include="FuzzyNumbers\DiscreteFuzzyNumberShould.cs" />
     <Compile Include="FuzzyNumbers\IntervalDShould.cs" />
+    <Compile Include="FuzzyNumbers\Matrixes\MatrixShould.cs" />
     <Compile Include="FuzzyNumbers\PointDShould.cs" />
     <Compile Include="FuzzyNumbers\TriangularFuzzyFunctionShould.cs" />
     <Compile Include="FuzzyNumbers\MathExtensionsShould.cs" />
+    <Compile Include="FuzzyNumbers\Vectors\VectorShould.cs" />
     <Compile Include="Misc\BinarySerializerShould.cs" />
     <Compile Include="Misc\TestPatternPreparerShould.cs" />
     <Compile Include="Net\FuzzyNeuronShould.cs" />
