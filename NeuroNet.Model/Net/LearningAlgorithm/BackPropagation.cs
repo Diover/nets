@@ -174,7 +174,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             var outputLayer = layers.Last();
             outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
             var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers)
+            foreach (var hiddenLayer in hiddenLayers.Reverse())
             {
                 hiddenLayer.ForeachNeuron(
                     (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
