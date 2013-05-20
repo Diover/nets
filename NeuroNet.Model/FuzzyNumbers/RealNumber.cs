@@ -98,5 +98,10 @@ namespace NeuroNet.Model.FuzzyNumbers
             var sign = new Random().Next(2);
             return new RealNumber(new Random().NextDouble() - sign);
         }
+
+        public override string ToString()
+        {
+            return _value.ToString("0.#####################");
+        }
     }
 }

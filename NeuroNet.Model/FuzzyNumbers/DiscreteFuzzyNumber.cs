@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -229,6 +228,13 @@ namespace NeuroNet.Model.FuzzyNumbers
         {
             var resultLevels = _alphaLevels.ToDictionary(level => level.Key, level => new IntervalD(f(level.Value.X), f(level.Value.Y)));
             return new DiscreteFuzzyNumber(resultLevels);
+        }
+
+        public override string ToString()
+        {
+            return _alphaLevels[0.0].X.ToString("0.################") + " | " +
+                   _alphaLevels[1.0].X.ToString("0.################") + " | " +
+                   _alphaLevels[0.0].Y.ToString("0.################");
         }
     }
 }
