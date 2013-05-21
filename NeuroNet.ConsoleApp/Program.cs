@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using NeuroNet.Model.FuzzyNumbers;
+using NeuroNet.Model.FuzzyNumbers.Vectors;
 using NeuroNet.Model.Misc;
 using NeuroNet.Model.Net;
 using NeuroNet.Model.Net.LearningAlgorithm;
@@ -14,6 +15,27 @@ namespace NeuroNet.ConsoleApp
     {
         static void Main(string[] args)
         {
+            var b = new BfgsMethod();
+            var f =
+                new Func<IVector, double>(
+                    vector =>
+                    -Math.Exp(-Math.Pow(vector[0].GetMod().X - 1, 2)) -
+                    Math.Exp(-0.5*Math.Pow(vector[1].GetMod().X - 2, 2)));
+
+            Func<IVector, IVector> g = vector => new Vector(new[]
+                {
+                    // df/dx = {-2 e^(-    (x-1)^2) (x-1)} 
+                    new RealNumber(2*Math.Exp(-Math.Pow(vector[0].GetMod().X - 1, 2))*(vector[0].GetMod().X - 1)),
+
+                    // df/dy = {-  e^(-1/2 (y-2)^2) (y-2)}
+                    new RealNumber(Math.Exp(-0.5*Math.Pow(vector[1].GetMod().X - 2, 2))*(vector[1].GetMod().X - 2))
+                });
+
+            b.Minimize(f, g, 2);
+
+            var x = b.Values;
+            var fx = b.Minimum;
+
             const int inputsCount = 2;
             const int hiddenNeuronsCount = 2;
             //var net = new SimpleFuzzyNet(inputsCount, new[] {hiddenNeuronsCount}, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3) levelsCount: 11);
@@ -22,7 +44,7 @@ namespace NeuroNet.ConsoleApp
             //var patterns = new TestPatternPreparer("testPatterns.txt", new FuzzyNumberParser()).PreparePatterns();
             var patterns = new TestPatternPreparer("testPatternsReal.txt", new RealNumberParser()).PreparePatterns();
 
-            /*var bp = new BackPropagation(patterns);
+            var bp = new BackPropagation(patterns);
             bp.CyclePerformed +=
                 (state) =>
                 {
@@ -30,9 +52,9 @@ namespace NeuroNet.ConsoleApp
                     if (state.Cycle % 100 == 0)
                         Console.WriteLine("cycle: " + state.Cycle +
                                           " error: " + state.CycleError.ToString("0.#####################"));
-                };*/
+                };
 
-            var bp = new BackPropagationWithPseudoNeuton(patterns);
+            /*var bp = new BackPropagationWithPseudoNeuton(patterns);
             bp.CyclePerformed +=
                 (state) =>
                     {
@@ -41,7 +63,7 @@ namespace NeuroNet.ConsoleApp
                             Console.WriteLine("cycle: " + state.Cycle +
                                               " error: " + state.CycleError.ToString("0.#########################") +
                                               " grad: " + state.GradientNorm.ToString());
-                    };
+                    };*/
 
             bp.LearnNet(net);
 
