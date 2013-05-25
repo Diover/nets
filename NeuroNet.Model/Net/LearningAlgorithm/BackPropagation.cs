@@ -82,8 +82,8 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     var output = neuron.LastOutput; //Ok
                     var expectedOutput = patternsOutput.ElementAt(i); //tk
                     var error = output.Mul(output.Apply(levelValue => 1 - levelValue))
-                                      .Mul(expectedOutput.Sub(output)); //Ok(1-Ok)(tk - Ok)
-                    error = new RealNumber(4).Mul(error);
+                                      .Mul(expectedOutput.Sub(output)).Mul(4.0); //Ok(1-Ok)(tk - Ok)
+                    error = error.Mul(4.0);
                     neuron.PropagatedError = neuron.PropagatedError == null ? error : neuron.PropagatedError.Sum(error);
                 });
             
@@ -96,7 +96,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                 layer.ForeachNeuron((neuronIndex, neuron) =>
                 {
                     var output = neuron.LastOutput; //Ok
-                    var part = new RealNumber(4).Mul(output.Mul(output.Apply(levelValue => 1 - levelValue))); //Ok(1 - Ok)
+                    var part = output.Mul(output.Apply(levelValue => 1 - levelValue)).Mul(4.0); //Ok(1 - Ok)
                     //var part = output.Mul(output.Apply(levelValue => 1 - levelValue)); //Ok(1 - Ok)
                     var sum = FuzzyNumberExtensions.Sum(0, nextLayer.NeuronsCount,
                                                         j => nextLayer.GetNeuron(j).GetWeight(neuronIndex).Signal
