@@ -14,7 +14,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         private IMatrix _b;
         private Func<IVector, double> _f;
 
-        public BfgsMethod(double alpha = 10, double errorThreshold = 0.000001)
+        public BfgsMethod(double alpha = 1.0, double errorThreshold = 0.000001)
         {
             _alpha = alpha;
             _errorThreshold = errorThreshold;
@@ -25,18 +25,19 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             _b = Matrix.CreateI(n, n, () => new RealNumber(1), () => new RealNumber(0));
             _x = new Vector(new[] {new RealNumber(0), new RealNumber(0)});
             _f = f;
+            IVector grad;
             do
             {
                 _gradient = gradient(_x);
                 var direction = CalculateMinimizeDirection(_b, _gradient);
                 var step = CalculateStepAndChangeAlpha(direction, f);
 
-                var nextGradient = gradient(_x); //nablaF(xk + 1)
-                var y = nextGradient.Sum(_gradient.Negate()); //yk
+                grad = gradient(_x); //nablaF(xk + 1)
+                var y = grad.Sum(_gradient.Negate()); //yk
 
                 //its time to calculate b(k + 1)
                 _b = CalculateInvertedPseudoGaussian(_b, step, y);
-            } while (_gradient.Norm.IsGreater(_errorThreshold));
+            } while (grad.Norm.IsGreater(_errorThreshold));
         }
 
         public IVector Values
@@ -58,18 +59,14 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         {
             IVector step;
             IVector newX;
-            //do
-            //{
+            do
+            {
                 step = direction.Mul(_alpha);
                 newX = _x.Sum(step);
-                //_alpha /= 2.0;
-                //_alpha *= 2.0;
-                if (f(newX) > f(_x))
-                    _alpha /= 2.0;
-                else
-                    _alpha *= 2.0;
-            //} while (f(newX) > f(_x));
-            
+                _alpha /= 2.0;
+            } while (f(newX) > f(_x));
+
+            _alpha = 1.0;
             _x = newX;
             return step;
         }
