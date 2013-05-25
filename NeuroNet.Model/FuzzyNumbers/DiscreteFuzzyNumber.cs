@@ -10,6 +10,7 @@ namespace NeuroNet.Model.FuzzyNumbers
         public const double Epsilon = 1E-15;
         public const int StandardAlphaLevelsCount = 101;
         private readonly Dictionary<double, IntervalD> _alphaLevels;
+        [NonSerialized] private static Random _rand = new Random();
 
         public DiscreteFuzzyNumber()
         {
@@ -113,15 +114,14 @@ namespace NeuroNet.Model.FuzzyNumbers
 
         private static IFuzzyFunction PrepareLittleFuzzyFunction(double min, double max)
         {
-            var rand = new Random();
             const int count = 4;
             var piece = (max - min) / count;
 
-            var pieceNumber = rand.Next(count);
+            var pieceNumber = _rand.Next(count);
 
-            var center = rand.NextDouble()*piece;
-            var left = rand.NextDouble()*piece;
-            var right = rand.NextDouble()*piece;
+            var center = _rand.NextDouble() * piece;
+            var left = _rand.NextDouble() * piece;
+            var right = _rand.NextDouble() * piece;
 
             var addShift = new Func<double, double>(x => x + min + pieceNumber * piece);
             return new TriangularFuzzyFunction(addShift(left), addShift(center), addShift(right));

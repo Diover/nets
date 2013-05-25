@@ -6,6 +6,7 @@ namespace NeuroNet.Model.FuzzyNumbers
     public class RealNumber : IFuzzyNumber
     {
         private double _value;
+        [NonSerialized] private static Random _rand = new Random();
 
         public RealNumber(double value)
         {
@@ -105,8 +106,8 @@ namespace NeuroNet.Model.FuzzyNumbers
 
         public static IFuzzyNumber GenerateLittleNumber()
         {
-            var sign = new Random().Next(2);
-            return new RealNumber(new Random().NextDouble() - sign);
+            var sign = _rand.Next(2);
+            return new RealNumber(_rand.NextDouble() - sign);
         }
 
         public override string ToString()
