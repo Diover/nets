@@ -33,6 +33,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             var learningCycleError = 0.0;
             do
             {
+                learningCycleError = 0.0;
                 var algorithmStep = 0;
                 foreach (var learningPattern in _patterns)
                 {
