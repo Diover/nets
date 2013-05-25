@@ -34,6 +34,11 @@ namespace NeuroNet.ConsoleApp
             return result;
         }
 
+        private static RealNumber GenerateNumber()
+        {
+            return new RealNumber(0.5);
+        }
+
         static void Main(string[] args)
         {
             /*var b = new BfgsMethod();
@@ -58,10 +63,11 @@ namespace NeuroNet.ConsoleApp
             var fx = b.Minimum;
             */
 
-            const int inputsCount = 2;
+            const int inputsCount = 1;
             const int hiddenNeuronsCount = 2;
             //var net = new SimpleFuzzyNet(inputsCount, new[] {hiddenNeuronsCount}, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3) levelsCount: 11);
-            var net = new SimpleFuzzyNet(inputsCount, new[] {hiddenNeuronsCount}, RealNumber.GenerateLittleNumber);
+            //var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount}, RealNumber.GenerateLittleNumber);
+            var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount }, GenerateNumber);
             
             //var patterns = new TestPatternPreparer("testPatterns.txt", new FuzzyNumberParser()).PreparePatterns();
             var patterns = new TestPatternPreparer("testPatternsReal.txt", new RealNumberParser()).PreparePatterns();
