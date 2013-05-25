@@ -22,9 +22,9 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         protected override void LearnBatch(INet net, double currentLearningCycleError)
         {
             var delta = _gradient.Negate();
-            ChangeWeights(delta, net.Layers);
+            ChangeWeights(delta, net);
 
-            ClearPropagatedError(net.Layers);
+            net.ClearPropagatedError();
         }
 
         protected override void LearnPattern(INet net, ILearningPattern learningPattern, double currentPatternError)
@@ -35,7 +35,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
         protected override void PrepareToLearning(INet net)
         {
-            _weights = CreateWeightsVector(net.Layers);
+            _weights = net.GetWeights();
             _outputDeltas = CreateOutputsDeltas(net.Layers);
         }
 
@@ -44,26 +44,15 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return currentError < ErrorThreshold;
         }
 
-        private IVector ChangeWeights(IVector weightsDelta, List<ILayer> layers)
+        private IVector ChangeWeights(IVector weightsDelta, INet net)
         {
             var oldWeights = _weights;
 
             var step = weightsDelta.Mul(_alpha);
             _weights = oldWeights.Sum(step);
-            SetWeights(_weights, layers);
+            net.SetWeights(_weights);
 
             return step;
-        }
-
-        private static void ClearPropagatedError(IEnumerable<ILayer> layers)
-        {
-            foreach (var layer in layers)
-            {
-                layer.ForeachNeuron((i, neuron) =>
-                    {
-                        neuron.PropagatedError = null;
-                    });
-            }
         }
 
         private IVector CreateWeightsGradient(List<ILayer> layers)

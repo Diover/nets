@@ -113,36 +113,6 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return patternError / 2.0;
         }
 
-        protected static IVector CreateWeightsVector(List<ILayer> layers)
-        {
-            var result = new List<IFuzzyNumber>();
-
-            var outputLayer = layers.Last();
-            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(weight.Signal)));
-            var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers.Reverse())
-            {
-                hiddenLayer.ForeachNeuron(
-                    (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(weight.Signal)));
-            }
-
-            return new Vector(result.ToArray());
-        }
-
-        protected static void SetWeights(IVector weights, List<ILayer> layers)
-        {
-            var queue = weights.ToQueue();
-
-            var outputLayer = layers.Last();
-            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => weight.Signal = queue.Dequeue()));
-            var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers.Reverse())
-            {
-                hiddenLayer.ForeachNeuron(
-                    (i, neuron) => neuron.ForeachWeight((j, weight) => weight.Signal = queue.Dequeue()));
-            }
-        }
-
         protected static List<ILink> CreateOutputsDeltas(List<ILayer> layers)
         {
             var outputs = new List<ILink>();
