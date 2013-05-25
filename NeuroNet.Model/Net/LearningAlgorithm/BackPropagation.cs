@@ -21,6 +21,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
         protected override void LearnBatch(INet net, double currentLearningCycleError)
         {
+            _gradient = CreateWeightsGradient(net.Layers);
             var delta = _gradient.Negate();
             ChangeWeights(delta, net);
 
@@ -29,8 +30,8 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
         protected override void LearnPattern(INet net, ILearningPattern learningPattern, double currentPatternError)
         {
-            _gradient = CalculateGradientOnLayers(net.Layers, learningPattern.Output);
-            
+            //call only after net.propagation()
+            CalculateGradientOnLayers(net.Layers, learningPattern.Output);
         }
 
         protected override void PrepareToLearning(INet net)
@@ -62,7 +63,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             var outputLayer = layers.Last();
             outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
             var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers.Reverse())
+            foreach (var hiddenLayer in hiddenLayers)
             {
                 hiddenLayer.ForeachNeuron(
                     (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
@@ -71,7 +72,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return new Vector(result.ToArray()).MemberviseMul(_outputDeltas.ToSignalsVector());
         }
 
-        private IVector CalculateGradientOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
+        private static void CalculateGradientOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
         {
             var outputLayer = layers.Last();
             outputLayer.ForeachNeuron((i, neuron) =>
@@ -84,27 +85,24 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     neuron.PropagatedError = neuron.PropagatedError == null ? error : neuron.PropagatedError.Sum(error);
                 });
             
-            var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers)
+            //from pre-last to first
+            for (int i = layers.Count - 2; i >= 0; i--)
             {
-                hiddenLayer.ForeachNeuron((i, neuron) =>
-                    {
-                        var output = neuron.LastOutput; //Ok
-                        var part = output.Mul(output.Apply(levelValue => 1 - levelValue)); //Ok(1 - Ok)
-                        var sum = FuzzyNumberExtensions.Sum(0, outputLayer.NeuronsCount, j => outputLayer.GetNeuron(j)
-                                                                                                  .GetWeight(i)
-                                                                                                  .Signal
-                                                                                                  .Mul(
-                                                                                                      outputLayer
-                                                                                                          .GetNeuron(j)
-                                                                                                          .PropagatedError));
-                        neuron.PropagatedError = neuron.PropagatedError == null
-                                                     ? part.Mul(sum)
-                                                     : neuron.PropagatedError.Sum(part.Mul(sum));
-                    });
-            }
+                var layer = layers.ElementAt(i);
+                var nextLayer = layers.ElementAt(i + 1);
 
-            return CreateWeightsGradient(layers);
+                layer.ForeachNeuron((neuronIndex, neuron) =>
+                {
+                    var output = neuron.LastOutput; //Ok
+                    var part = output.Mul(output.Apply(levelValue => 1 - levelValue)); //Ok(1 - Ok)
+                    var sum = FuzzyNumberExtensions.Sum(0, nextLayer.NeuronsCount,
+                                                        j => nextLayer.GetNeuron(j).GetWeight(neuronIndex).Signal
+                                                                      .Mul(nextLayer.GetNeuron(j).PropagatedError));
+                    neuron.PropagatedError = neuron.PropagatedError == null
+                                                 ? part.Mul(sum)
+                                                 : neuron.PropagatedError.Sum(part.Mul(sum));
+                });
+            }
         }
     }
 }
