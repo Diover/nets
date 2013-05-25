@@ -688,6 +688,62 @@ namespace NeuroNet.Model.Tests.Net
                 Assert.That(lastInputs[i].GetMod().X, Is.EqualTo(expectedLastInputs[i].GetMod().X));
             }
         }
+
+        [Test]
+        public void CorrectlyGetWeightsOfNextLayer()
+        {
+            const int inputs = 2;
+            var hidden = new[] { 2, 2 };
+            const int outputs = 2;
+            var net = new SimpleFuzzyNet(inputs, hidden, GenerateNumbers, outputNeuronsCount: outputs);
+
+            var weights = new Vector(new IFuzzyNumber[]
+                {
+                    //output layer
+                    //first neuron
+                    new RealNumber(2.0),
+                    new RealNumber(2.0),
+                    //second neuron
+                    new RealNumber(4.0),
+                    new RealNumber(2.0),
+
+                    //hidden 1
+                    new RealNumber(1.0),
+                    new RealNumber(-1.5),
+                    new RealNumber(2.0),
+                    new RealNumber(1.0),
+
+                    //hidden 2
+                    new RealNumber(-1.0),
+                    new RealNumber(-1.0),
+                    new RealNumber(2.0),
+                    new RealNumber(-1.0),
+                });
+
+            //tuple: (layer, neuron, weight)
+            var expectedWeights = new Dictionary<Tuple<int, int, int>, IFuzzyNumber>();
+            for (int i = 0; i < weights.Length; i++)
+            {
+                expectedWeights.Add(new Tuple<int, int, int>(ToLayerIndex(i), ToNeuronIndex(i), ToWeightIndex(i)),
+                                    weights[i]);
+            }
+
+            for (int i = net.Layers.Count - 2; i >= 0; i--)
+            {
+                var layer = net.Layers.ElementAt(i);
+                var nextLayer = net.Layers.ElementAt(i + 1);
+
+                layer.ForeachNeuron((neuronIndex, neuron) =>
+                {
+                    for (int j = 0; j < nextLayer.NeuronsCount; j++)
+                    {
+                        var weight = nextLayer.GetNeuron(j).GetWeight(neuronIndex).Signal;
+                        Assert.That(weight.GetMod().X,
+                                    Is.EqualTo(expectedWeights[new Tuple<int, int, int>(i + 1, j, neuronIndex)].GetMod().X));
+                    }
+                });
+            }
+        }
         /// <summary>
         /// This function is used to generate appropriate weights for net
         /// </summary>
