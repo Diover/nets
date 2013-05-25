@@ -36,7 +36,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         protected override void PrepareToLearning(INet net)
         {
             _weights = net.GetWeights();
-            _outputDeltas = CreateOutputsDeltas(net.Layers);
+            _outputDeltas = net.GetLastInputsForWeights();
         }
 
         protected override bool IsNetLearned(double currentError)

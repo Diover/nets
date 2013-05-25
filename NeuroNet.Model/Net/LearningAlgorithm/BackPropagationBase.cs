@@ -113,22 +113,6 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return patternError / 2.0;
         }
 
-        protected static List<ILink> CreateOutputsDeltas(List<ILayer> layers)
-        {
-            var outputs = new List<ILink>();
-            
-            var outputLayer = layers.Last();
-            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
-            var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers.Reverse())
-            {
-                hiddenLayer.ForeachNeuron(
-                    (i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
-            }
-
-            return outputs;
-        }
-
         private void AddLittleCorrectionToWeights(List<ILayer> layers)
         {
             for (int i = 0; i < layers.Count; i++)
