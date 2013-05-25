@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NeuroNet.Model.FuzzyNumbers;
+using NeuroNet.Model.FuzzyNumbers.Vectors;
 using NeuroNet.Model.Net.LearningAlgorithm;
 
 namespace NeuroNet.Model.Net
@@ -12,5 +13,9 @@ namespace NeuroNet.Model.Net
         List<IFuzzyNumber> LastOutput { get; }
         List<ILayer> Layers { get; }
         int WeightsCount { get; }
+
+        void SetWeights(IVector weights);
+        IVector GetWeights();
+        void ClearPropagatedError();
     }
 }

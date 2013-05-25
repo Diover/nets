@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NeuroNet.Model.FuzzyNumbers;
 using System.Linq;
+using NeuroNet.Model.FuzzyNumbers.Vectors;
 using NeuroNet.Model.Net.LearningAlgorithm;
 
 namespace NeuroNet.Model.Net
@@ -109,6 +110,43 @@ namespace NeuroNet.Model.Net
                 Layers.ForEach(
                     layer => layer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => count += 1)));
                 return count;
+            }
+        }
+
+        public void SetWeights(IVector weights)
+        {
+            var queue = weights.ToQueue();
+
+            _output.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => weight.Signal = queue.Dequeue()));
+            foreach (var layer in _hiddens)
+            {
+                layer.ForeachNeuron(
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => weight.Signal = queue.Dequeue()));
+            }
+        }
+
+        public IVector GetWeights()
+        {
+            var result = new List<IFuzzyNumber>();
+
+            _output.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(weight.Signal)));
+            foreach (var hiddenLayer in _hiddens)
+            {
+                hiddenLayer.ForeachNeuron(
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(weight.Signal)));
+            }
+
+            return new Vector(result.ToArray());
+        }
+
+        public void ClearPropagatedError()
+        {
+            foreach (var layer in Layers)
+            {
+                layer.ForeachNeuron((i, neuron) =>
+                {
+                    neuron.PropagatedError = null;
+                });
             }
         }
     }
