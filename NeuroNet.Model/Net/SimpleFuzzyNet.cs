@@ -23,10 +23,13 @@ namespace NeuroNet.Model.Net
             }
             for (int i = 0; i < hiddenNeuronsCount.Length; i++)
             {
-                _hiddens.Add(new Layer(hiddenNeuronsCount[i], levelsCount, littleFuzzyNumberGenerator, activationFunction));
+                _hiddens.Add(new Layer(hiddenNeuronsCount[i],
+                                       levelsCount,
+                                       littleFuzzyNumberGenerator,
+                                       activationFunction) {Name = "Hidden layer " + i});
             }
 
-            _output = new Layer(outputNeuronsCount, levelsCount, littleFuzzyNumberGenerator, activationFunction);
+            _output = new Layer(outputNeuronsCount, levelsCount, littleFuzzyNumberGenerator, activationFunction){Name = "Output layer"};
             Layers = new List<ILayer>(_hiddens) {_output};
             for (int i = 0; i < outputNeuronsCount; i++)
             {

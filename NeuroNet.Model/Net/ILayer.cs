@@ -14,5 +14,6 @@ namespace NeuroNet.Model.Net
         int NeuronsCount { get; }
         List<IFuzzyNumber> LastOutput { get; }
         IFuzzyNeuron GetNeuron(int i);
+        string Name { get; }
     }
 }

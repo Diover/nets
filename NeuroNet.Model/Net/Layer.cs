@@ -118,6 +118,19 @@ namespace NeuroNet.Model.Net
             return _neurons.ElementAt(i);
         }
 
+        private string _name;
+
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name != null)
+                    throw new ArgumentException("Cannot set Name twice");
+                _name = value;
+            }
+        }
+
         public int NeuronsCount { get { return _neurons.Count; } }
         
         public List<IFuzzyNumber> LastOutput 
