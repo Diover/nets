@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NeuroNet.Model.FuzzyNumbers;
@@ -63,24 +65,44 @@ namespace NeuroNet.ConsoleApp
             var fx = b.Minimum;
             */
 
-            const int inputsCount = 1;
+            const int inputsCount = 2;
             const int hiddenNeuronsCount = 2;
+            const int outputNeuronsCount = 1;
             //var net = new SimpleFuzzyNet(inputsCount, new[] {hiddenNeuronsCount}, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3) levelsCount: 11);
-            //var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount}, RealNumber.GenerateLittleNumber);
-            var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount }, GenerateNumber);
-            
-            //var patterns = new TestPatternPreparer("testPatterns.txt", new FuzzyNumberParser()).PreparePatterns();
-            var patterns = new TestPatternPreparer("testPatternsReal.txt", new RealNumberParser()).PreparePatterns();
-            //var patterns = CreatePatterns((x, y) => Math.Abs(Math.Sin(x) + Math.Sin(y))/2.0);
+            var activation = new Func<double, double>(signal => 1.0/(1.0 + Math.Exp(-4*(signal - 0.5))));
+            var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount }, RealNumber.GenerateLittleNumber, activation, outputNeuronsCount: outputNeuronsCount);
+            //var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount, hiddenNeuronsCount }, GenerateNumber);
 
-            var bp = new BackPropagation(patterns);
+            var weights = new Vector(new IFuzzyNumber[]
+                {
+                    //output layer
+                    //one neuron
+                    new RealNumber(0.032680),
+                    new RealNumber(0.020701),
+
+                    //hidden 0
+                    new RealNumber(-0.082843),
+                    new RealNumber(0.018629),
+                    new RealNumber(-0.011006),
+                    new RealNumber(-0.071407),
+                });
+            net.SetWeights(weights);
+            const string filename = "testPatternsXOR.txt";
+            //var patterns = new TestPatternPreparer("testPatterns.txt", new FuzzyNumberParser()).PreparePatterns();
+            var patterns = new TestPatternPreparer(Path.Combine("../../../Misc", filename), new RealNumberParser()).PreparePatterns();
+            //var patterns = CreatePatterns((x, y) => Math.Abs(Math.Sin(x) + Math.Sin(y))/2.0);
+            var error = 0.002;
+            var bp = new BackPropagation(patterns, 0.5, 0.002);
             bp.CyclePerformed +=
                 (state) =>
                 {
-                    Console.ReadKey();
-                    //if (state.Cycle % 100 == 0)
+                    //Console.ReadKey();
+                    if (state.Cycle%50 == 0)
+                    {
+                        //Console.ReadKey();
                         Console.WriteLine("cycle: " + state.Cycle +
                                           " error: " + state.CycleError.ToString("0.#####################"));
+                    }
                 };
 
             /*var bp = new BackPropagationWithPseudoNeuton(patterns);
@@ -96,33 +118,8 @@ namespace NeuroNet.ConsoleApp
 
             bp.LearnNet(net);
 
-            BinaryFileSerializer.SaveNetState("LearnedNet.net", net);
-            
-            /*
-            var net = BinaryFileSerializer.LoadNetState("LearnedNet.net");
-            var patterns = new TestPatternPreparer("testPatternsReal.txt", new RealNumberParser()).PreparePatterns();
-            foreach (var pattern in patterns)
-            {
-                var o = net.Propagate(pattern.Input);
-            }*/
-            
-            //var inputs = new List<IFuzzyNumber>();
-            //for (int i = 0; i < inputsCount; i++)
-            //    inputs.Add(DiscreteFuzzyNumber.GenerateLittleNumber());
+            BinaryFileSerializer.SaveNetState("../../../Misc/LearnedNet " + Path.GetFileNameWithoutExtension(filename) + " " + inputsCount + "-" + hiddenNeuronsCount + "-" + outputNeuronsCount + ".net", net);
 
-            //var net = BinaryFileSerializer.LoadNetState("H:\\test.net");
-
-            //var s = new Stopwatch();
-            //s.Start();
-            //var output = net.PropagateLastInput();
-            //s.Stop();
-            //var time = s.Elapsed;
-
-            //output.First()
-            //      .ForeachLevel((alpha, interval) => Console.WriteLine("alpha: " + alpha + " levels:" + interval));
-            //Console.WriteLine("Time of signal propagation: " + time);
-
-            //BinaryFileSerializer.SaveNetState("H:\\test.net", net);
             Console.WriteLine("Finished. Press any key...");
             Console.ReadKey();
         }

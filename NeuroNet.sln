@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuroNet.Model.Tests", "Neu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuroNet.ConsoleApp", "NeuroNet.ConsoleApp\NeuroNet.ConsoleApp.csproj", "{C65DB43C-B738-4781-87EB-DA597A28F671}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuroNet.Testing", "NeuroNet.Testing\NeuroNet.Testing.csproj", "{7202DB3E-ADCB-4DAC-A145-7E81DF71B5FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{C65DB43C-B738-4781-87EB-DA597A28F671}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C65DB43C-B738-4781-87EB-DA597A28F671}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C65DB43C-B738-4781-87EB-DA597A28F671}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7202DB3E-ADCB-4DAC-A145-7E81DF71B5FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7202DB3E-ADCB-4DAC-A145-7E81DF71B5FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7202DB3E-ADCB-4DAC-A145-7E81DF71B5FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7202DB3E-ADCB-4DAC-A145-7E81DF71B5FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
