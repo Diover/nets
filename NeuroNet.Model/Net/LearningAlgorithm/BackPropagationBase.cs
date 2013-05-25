@@ -37,7 +37,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                 var algorithmStep = 0;
                 foreach (var learningPattern in _patterns)
                 {
-                    var patternError = CalculatePatternError(net, learningPattern.Input, learningPattern.Output);
+                    var patternError = CalculatePatternError(net, learningPattern);
                     learningCycleError += patternError;
 
                     if (patternError > 0.0)
@@ -62,9 +62,9 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         protected abstract void LearnPattern(INet net, ILearningPattern learningPattern, double currentPatternError);
         protected abstract void PrepareToLearning(INet net);
         protected abstract bool IsNetLearned(double currentError);
-        protected virtual double CalculatePatternError(INet net, List<IFuzzyNumber> input, List<IFuzzyNumber> output)
+        protected virtual double CalculatePatternError(INet net, ILearningPattern pattern)
         {
-            return GetPatternError(net, input, output);
+            return GetPatternError(net, pattern);
         }
 
         public event StepPerformedEventHandler StepPerformed;
@@ -82,10 +82,10 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                 CyclePerformed(new StepState(cycle, 0, cycleError));
         }
 
-        protected static double GetPatternError(INet net, List<IFuzzyNumber> input, List<IFuzzyNumber> output)
+        protected static double GetPatternError(INet net, ILearningPattern pattern)
         {
-            var actual = net.Propagate(input);
-            var expected = output;
+            var actual = net.Propagate(pattern.Input);
+            var expected = pattern.Output;
 
             var errors = new List<IFuzzyNumber>();
             var i = 0;
