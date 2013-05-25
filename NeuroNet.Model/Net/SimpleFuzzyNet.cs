@@ -149,5 +149,19 @@ namespace NeuroNet.Model.Net
                 });
             }
         }
+
+        public List<ILink> GetLastInputsForWeights()
+        {
+            var outputs = new List<ILink>();
+
+            _output.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
+            foreach (var hiddenLayer in _hiddens)
+            {
+                hiddenLayer.ForeachNeuron(
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
+            }
+
+            return outputs;
+        }
     }
 }

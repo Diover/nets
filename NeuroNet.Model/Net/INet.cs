@@ -17,5 +17,6 @@ namespace NeuroNet.Model.Net
         void SetWeights(IVector weights);
         IVector GetWeights();
         void ClearPropagatedError();
+        List<ILink> GetLastInputsForWeights();
     }
 }
