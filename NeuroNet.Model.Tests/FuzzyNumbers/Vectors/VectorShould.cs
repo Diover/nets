@@ -83,5 +83,66 @@ namespace NeuroNet.Model.Tests.FuzzyNumbers.Vectors
                 for (int j = 0; j < valuesY.Length; j++)
                     Assert.That(result[i, j].GetMod().X, Is.EqualTo(expected[i][j].GetMod().X));
         }
+
+        [Test]
+        public void CorrectlySumWithAnotherVector()
+        {
+            var valuesX = new[] { new RealNumber(1.0), new RealNumber(2.0), new RealNumber(-1.0) };
+            IVector vectorX = new Vector(valuesX);
+            var valuesY = new[] { new RealNumber(4.0), new RealNumber(-2.0), new RealNumber(0.0) };
+            IVector vectorY = new Vector(valuesY);
+
+            var result = vectorX.Sum(vectorY);
+            var expected = new[]
+                {
+                    new RealNumber(5.0),
+                    new RealNumber(0.0),
+                    new RealNumber(-1.0),
+                };
+
+            Assert.That(result.Length, Is.EqualTo(valuesX.Length));
+            for (int i = 0; i < valuesX.Length; i++)
+                Assert.That(result[i].GetMod().X, Is.EqualTo(expected[i].GetMod().X));
+        }
+
+        [Test]
+        public void CorrectlyMemberviseMulWithAnotherVector()
+        {
+            var valuesX = new[] { new RealNumber(1.0), new RealNumber(2.0), new RealNumber(-1.0) };
+            IVector vectorX = new Vector(valuesX);
+            var valuesY = new[] { new RealNumber(4.0), new RealNumber(-2.0), new RealNumber(0.0) };
+            IVector vectorY = new Vector(valuesY);
+
+            var result = vectorX.MemberviseMul(vectorY);
+            var expected = new[]
+                {
+                    new RealNumber(4.0),
+                    new RealNumber(-4.0),
+                    new RealNumber(0.0),
+                };
+
+            Assert.That(result.Length, Is.EqualTo(valuesX.Length));
+            for (int i = 0; i < valuesX.Length; i++)
+                Assert.That(result[i].GetMod().X, Is.EqualTo(expected[i].GetMod().X));
+        }
+
+        [Test]
+        public void CorrectlyNegateVector()
+        {
+            var valuesX = new[] { new RealNumber(1.0), new RealNumber(0.0), new RealNumber(-1.0) };
+            IVector vectorX = new Vector(valuesX);
+
+            var result = vectorX.Negate();
+            var expected = new[]
+                {
+                    new RealNumber(-1.0),
+                    new RealNumber(0.0),
+                    new RealNumber(1.0),
+                };
+
+            Assert.That(result.Length, Is.EqualTo(valuesX.Length));
+            for (int i = 0; i < valuesX.Length; i++)
+                Assert.That(result[i].GetMod().X, Is.EqualTo(expected[i].GetMod().X));
+        }
     }
 }
