@@ -20,7 +20,7 @@ namespace NeuroNet.Model.Net
 
         public override string ToString()
         {
-            return Signal.ToString();
+            return Signal == null? "null" : Signal.ToString();
         }
     }
 }
