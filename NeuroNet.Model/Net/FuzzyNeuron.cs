@@ -28,7 +28,8 @@ namespace NeuroNet.Model.Net
         public FuzzyNeuron(Func<double, double> f, Func<IFuzzyNumber> littleFuzzyNumberGenerator)
         {
             _propagatedError = null;
-            _f = f;
+            if(f != null)
+                _f = f;
             _generateLittleFuzzyNumber = littleFuzzyNumberGenerator;
         }
 

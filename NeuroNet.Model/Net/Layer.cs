@@ -19,11 +19,11 @@ namespace NeuroNet.Model.Net
             _forwardLinks = new List<ILink>();
         }
 
-        public Layer(int neuronsCount, int levelsCount, Func<IFuzzyNumber> littleFuzzyNumberGenerator)
+        public Layer(int neuronsCount, int levelsCount, Func<IFuzzyNumber> littleFuzzyNumberGenerator, Func<double, double> activationFunction = null)
             : this()
         {
             for (int i = 0; i < neuronsCount; i++)
-                AddNeuron(new FuzzyNeuron(littleFuzzyNumberGenerator));
+                AddNeuron(new FuzzyNeuron(activationFunction, littleFuzzyNumberGenerator));
         }
 
         public void AddNeuron(IFuzzyNeuron neuron)

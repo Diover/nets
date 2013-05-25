@@ -14,7 +14,7 @@ namespace NeuroNet.Model.Net
         private readonly ILayer _output;
         private readonly List<ILink> _outputSignals = new List<ILink>();
 
-        public SimpleFuzzyNet(int inputNeuronsCount, int[] hiddenNeuronsCount, Func<IFuzzyNumber> littleFuzzyNumberGenerator, int outputNeuronsCount = 1, int levelsCount = 100)
+        public SimpleFuzzyNet(int inputNeuronsCount, int[] hiddenNeuronsCount, Func<IFuzzyNumber> littleFuzzyNumberGenerator, Func<double, double> activationFunction = null,  int outputNeuronsCount = 1, int levelsCount = 100)
         {
             for (int i = 0; i < inputNeuronsCount; i++)
             {
@@ -23,10 +23,10 @@ namespace NeuroNet.Model.Net
             }
             for (int i = 0; i < hiddenNeuronsCount.Length; i++)
             {
-                _hiddens.Add(new Layer(hiddenNeuronsCount[i], levelsCount, littleFuzzyNumberGenerator));
+                _hiddens.Add(new Layer(hiddenNeuronsCount[i], levelsCount, littleFuzzyNumberGenerator, activationFunction));
             }
-            
-            _output = new Layer(outputNeuronsCount, levelsCount, littleFuzzyNumberGenerator);
+
+            _output = new Layer(outputNeuronsCount, levelsCount, littleFuzzyNumberGenerator, activationFunction);
             Layers = new List<ILayer>(_hiddens) {_output};
             for (int i = 0; i < outputNeuronsCount; i++)
             {
