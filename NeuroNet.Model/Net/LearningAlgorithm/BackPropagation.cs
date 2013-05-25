@@ -7,9 +7,6 @@ using NeuroNet.Model.FuzzyNumbers.Vectors;
 
 namespace NeuroNet.Model.Net.LearningAlgorithm
 {
-    public delegate void StepPerformedEventHandler(StepState state);
-    public delegate void CyclePerformedEventHandler(StepState state);
-
     public class BackPropagation : ILearningAlgorithm
     {
         private readonly List<ILearningPattern> _patterns;

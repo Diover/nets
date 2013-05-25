@@ -74,6 +74,7 @@
     <Compile Include="FuzzyNumbers\FuzzyNumberExtensions.cs" />
     <Compile Include="Net\INet.cs" />
     <Compile Include="Net\LearningAlgorithm\BackPropagation.cs" />
+    <Compile Include="Net\LearningAlgorithm\BackPropagationBase.cs" />
     <Compile Include="Net\LearningAlgorithm\BackPropagationWithPseudoNeuton.cs" />
     <Compile Include="Net\LearningAlgorithm\BfgsMethod.cs" />
     <Compile Include="Net\LearningAlgorithm\ILearningAlgorithm.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Net\LearningAlgorithm\LearningPattern.cs" />
     <Compile Include="Net\LearningAlgorithm\StepState.cs" />
     <Compile Include="Net\Link.cs" />
+    <Compile Include="Net\LinkExtensions.cs" />
     <Compile Include="Net\SimpleFuzzyNet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
