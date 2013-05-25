@@ -17,5 +17,10 @@ namespace NeuroNet.Model.Net
         }
 
         public IFuzzyNumber Signal { get; set; }
+
+        public override string ToString()
+        {
+            return Signal.ToString();
+        }
     }
 }

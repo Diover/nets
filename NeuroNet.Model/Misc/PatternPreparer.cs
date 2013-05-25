@@ -38,9 +38,12 @@ namespace NeuroNet.Model.Misc
 
         private LearningPattern ParseLine(string line)
         {
-            int inputOutputSeparator = line.IndexOf(' ');
-            string inputsPart = line.Substring(0, inputOutputSeparator);
-            string outputsPart = line.Substring(inputOutputSeparator + 1, line.Length - inputOutputSeparator - 1);
+            if(line[0] == '/' && line[1] == '/')
+                return null;
+
+            int inputOutputSeparatorPosition = line.IndexOf(' ');
+            string inputsPart = line.Substring(0, inputOutputSeparatorPosition);
+            string outputsPart = line.Substring(inputOutputSeparatorPosition + 1, line.Length - inputOutputSeparatorPosition - 1);
 
             if (inputsPart == "" || outputsPart == "")
                 return null;
