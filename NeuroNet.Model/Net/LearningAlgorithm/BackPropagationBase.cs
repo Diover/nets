@@ -30,9 +30,9 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             PrepareToLearning(net);
 
             var algorithmCycle = 0;
+            var learningCycleError = 0.0;
             do
             {
-                var learningCycleError = 0.0;
                 var algorithmStep = 0;
                 foreach (var learningPattern in _patterns)
                 {
@@ -54,13 +54,13 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
                 OnCyclePerformed(algorithmCycle, learningCycleError);
                 algorithmCycle++;
-            } while (!IsNetLearned());
+            } while (!IsNetLearned(learningCycleError));
         }
 
         protected abstract void LearnBatch(INet net, double currentLearningCycleError);
         protected abstract void LearnPattern(INet net, ILearningPattern learningPattern, double currentPatternError);
         protected abstract void PrepareToLearning(INet net);
-        protected abstract bool IsNetLearned();
+        protected abstract bool IsNetLearned(double currentError);
         protected virtual double CalculatePatternError(INet net, List<IFuzzyNumber> input, List<IFuzzyNumber> output)
         {
             return GetPatternError(net, input, output);
@@ -156,6 +156,19 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             }
 
             return outputs;
+        }
+
+        private void AddLittleCorrectionToWeights(List<ILayer> layers)
+        {
+            for (int i = 0; i < layers.Count; i++)
+            {
+                var layer = layers.ElementAt(i);
+                layer.ForeachNeuron((j, neuron) => neuron.ForeachWeight((k, weight) =>
+                {
+                    //weight.Signal = weight.Signal.Sum(DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 11));
+                    weight.Signal = weight.Signal.Sum(RealNumber.GenerateLittleNumber());
+                }));
+            }
         }
     }
 }

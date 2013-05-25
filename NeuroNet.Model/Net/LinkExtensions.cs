@@ -6,7 +6,7 @@ namespace NeuroNet.Model.Net
 {
     public static class LinkExtensions
     {
-        public static IVector ToVector(this IEnumerable<ILink> links)
+        public static IVector ToSignalsVector(this IEnumerable<ILink> links)
         {
             var res = links.Select(link => link.Signal).ToArray();
             return new Vector(res);
