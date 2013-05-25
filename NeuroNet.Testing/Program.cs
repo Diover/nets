@@ -12,7 +12,7 @@ namespace NeuroNet.Testing
     {
         static void Main(string[] args)
         {
-            var net = BinaryFileSerializer.LoadNetState("");
+            var net = BinaryFileSerializer.LoadNetState("../../../Misc/LearnedNet testPatternsXOR 2-2-1.net");
             var patterns = new TestPatternPreparer("../../../Misc/testPatternsXOR.txt", new RealNumberParser()).PreparePatterns();
             var output = patterns.Select(pattern => net.Propagate(pattern.Input)).ToList();
 

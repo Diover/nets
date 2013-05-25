@@ -69,8 +69,7 @@ namespace NeuroNet.ConsoleApp
             const int hiddenNeuronsCount = 2;
             const int outputNeuronsCount = 1;
             //var net = new SimpleFuzzyNet(inputsCount, new[] {hiddenNeuronsCount}, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 3) levelsCount: 11);
-            var activation = new Func<double, double>(signal => 1.0/(1.0 + Math.Exp(-4*(signal - 0.5))));
-            var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount }, RealNumber.GenerateLittleNumber, activation, outputNeuronsCount: outputNeuronsCount);
+            var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount }, RealNumber.GenerateLittleNumber, outputNeuronsCount: outputNeuronsCount);
             //var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount, hiddenNeuronsCount }, GenerateNumber);
 
             var weights = new Vector(new IFuzzyNumber[]
@@ -92,7 +91,7 @@ namespace NeuroNet.ConsoleApp
             var patterns = new TestPatternPreparer(Path.Combine("../../../Misc", filename), new RealNumberParser()).PreparePatterns();
             //var patterns = CreatePatterns((x, y) => Math.Abs(Math.Sin(x) + Math.Sin(y))/2.0);
             var error = 0.002;
-            var bp = new BackPropagation(patterns, 0.5, 0.002);
+            var bp = new BackPropagation(patterns, 0.5, 0.001);
             bp.CyclePerformed +=
                 (state) =>
                 {
