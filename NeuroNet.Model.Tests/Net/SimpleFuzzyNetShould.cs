@@ -480,6 +480,214 @@ namespace NeuroNet.Model.Tests.Net
             }
         }
 
+        [Test]
+        public void CreateNulledLastInputsVectorAtStart()
+        {
+            const int inputs = 2;
+            var hidden = new[] { 2, 2 };
+            const int outputs = 2;
+            Func<double, double> activation = x => x;
+            var net = new SimpleFuzzyNet(inputs, hidden, () => new RealNumber(0.0), activation, outputs);
+
+            var lastInputs = net.GetLastInputsForWeights();
+            
+            foreach (var input in lastInputs)
+            {
+                Assert.IsNull(input.Signal);
+            }
+        }
+
+        [Test]
+        public void ContainsCorrectLastInputsVectorAfterFirstPropagation()
+        {
+            const int inputs = 2;
+            var hidden = new[] { 2, 2 };
+            const int outputs = 2;
+            Func<double, double> activation = x => x;
+            var net = new SimpleFuzzyNet(inputs, hidden, GenerateNumbers, activation, outputs);
+            var input = new List<IFuzzyNumber>
+                {
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+                };
+            var lastInputs = net.GetLastInputsForWeights();
+            net.Propagate(input);
+            
+            var expectedLastInputs = new IFuzzyNumber[]
+                {
+                    //output layer
+                    //first neuron
+                    new RealNumber(-2.0),
+                    new RealNumber(-8.0),
+                    //second neuron
+                    new RealNumber(-2.0),
+                    new RealNumber(-8.0),
+
+                    //hidden 1
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+
+                    //hidden 2
+                    new RealNumber(-2.0),
+                    new RealNumber(4.0),
+                    new RealNumber(-2.0),
+                    new RealNumber(4.0),
+                };
+
+            int i = 0;
+            foreach (var lastInput in lastInputs)
+            {
+                Assert.That(lastInput.Signal.GetMod().X, Is.EqualTo(expectedLastInputs[i].GetMod().X));
+                i++;
+            }
+        }
+
+        [Test]
+        public void ContainsCorrectLastInputsVectorAfterSecondPropagationWithWeightsChanged()
+        {
+            const int inputs = 2;
+            var hidden = new[] { 2, 2 };
+            const int outputs = 2;
+            Func<double, double> activation = x => x;
+            var net = new SimpleFuzzyNet(inputs, hidden, GenerateNumbers, activation, outputs);
+            var input = new List<IFuzzyNumber>
+                {
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+                };
+            var lastInputs = net.GetLastInputsForWeights();
+
+            net.Propagate(input);
+            ChangeFirstWeightsOfNeuronsToOne(net.Layers);
+            net.Propagate(input);
+
+            var expectedLastInputs = new IFuzzyNumber[]
+                {
+                    //output layer
+                    //first neuron
+                    new RealNumber(-5.0),
+                    new RealNumber(-5.0),
+                    //second neuron
+                    new RealNumber(-5.0),
+                    new RealNumber(-5.0),
+
+                    //hidden 1
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+
+                    //hidden 2
+                    new RealNumber(-2.0),
+                    new RealNumber(3.0),
+                    new RealNumber(-2.0),
+                    new RealNumber(3.0),
+                };
+
+            int i = 0;
+            foreach (var lastInput in lastInputs)
+            {
+                Assert.That(lastInput.Signal.GetMod().X, Is.EqualTo(expectedLastInputs[i].GetMod().X));
+                i++;
+            }
+        }
+
+        [Test]
+        public void CreateCorrectLastInputsVectorAfterFirstPropagation()
+        {
+            const int inputs = 2;
+            var hidden = new[] { 2, 2 };
+            const int outputs = 2;
+            Func<double, double> activation = x => x;
+            var net = new SimpleFuzzyNet(inputs, hidden, GenerateNumbers, activation, outputs);
+            var input = new List<IFuzzyNumber>
+                {
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+                };
+            var lastInputsLinks = net.GetLastInputsForWeights();
+            net.Propagate(input);
+            var lastInputs = lastInputsLinks.ToSignalsVector();
+
+            var expectedLastInputs = new IFuzzyNumber[]
+                {
+                    //output layer
+                    //first neuron
+                    new RealNumber(-2.0),
+                    new RealNumber(-8.0),
+                    //second neuron
+                    new RealNumber(-2.0),
+                    new RealNumber(-8.0),
+
+                    //hidden 1
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+
+                    //hidden 2
+                    new RealNumber(-2.0),
+                    new RealNumber(4.0),
+                    new RealNumber(-2.0),
+                    new RealNumber(4.0),
+                };
+
+            for (int i = 0; i < expectedLastInputs.Length; i++)
+            {
+                Assert.That(lastInputs[i].GetMod().X, Is.EqualTo(expectedLastInputs[i].GetMod().X));
+            }
+        }
+
+        [Test]
+        public void CreateCorrectLastInputsVectorAfterSecondPropagationWithWeightsChanged()
+        {
+            const int inputs = 2;
+            var hidden = new[] { 2, 2 };
+            const int outputs = 2;
+            Func<double, double> activation = x => x;
+            var net = new SimpleFuzzyNet(inputs, hidden, GenerateNumbers, activation, outputs);
+            var input = new List<IFuzzyNumber>
+                {
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+                };
+
+            var lastInputsLinks = net.GetLastInputsForWeights();
+            net.Propagate(input);
+            ChangeFirstWeightsOfNeuronsToOne(net.Layers);
+            net.Propagate(input);
+            var lastInputs = lastInputsLinks.ToSignalsVector();
+
+            var expectedLastInputs = new IFuzzyNumber[]
+                {
+                    //output layer
+                    //first neuron
+                    new RealNumber(-5.0),
+                    new RealNumber(-5.0),
+                    //second neuron
+                    new RealNumber(-5.0),
+                    new RealNumber(-5.0),
+
+                    //hidden 1
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+                    new RealNumber(1.0),
+                    new RealNumber(2.0),
+
+                    //hidden 2
+                    new RealNumber(-2.0),
+                    new RealNumber(3.0),
+                    new RealNumber(-2.0),
+                    new RealNumber(3.0),
+                };
+
+            for (int i = 0; i < expectedLastInputs.Length; i++)
+            {
+                Assert.That(lastInputs[i].GetMod().X, Is.EqualTo(expectedLastInputs[i].GetMod().X));
+            }
+        }
         /// <summary>
         /// This function is used to generate appropriate weights for net
         /// </summary>
