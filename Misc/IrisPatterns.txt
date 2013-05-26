@@ -1,5 +1,11 @@
 //http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data
 //Iris-versicolor
+//
+//Learned!
+//structure: 4-4-1
+//error: 0.95 (two examples are not regonized)
+//f(x) = 1.0 / (1.0 + exp(-2(x - 0.5)))
+//
 7.0;3.2;4.7;1.4 0
 6.4;3.2;4.5;1.5 0
 6.9;3.1;4.9;1.5 0
