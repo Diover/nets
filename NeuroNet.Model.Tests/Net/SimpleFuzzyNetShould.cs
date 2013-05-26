@@ -252,7 +252,8 @@ namespace NeuroNet.Model.Tests.Net
             const int inputs = 2;
             var hidden = new[] { 2, 2 };
             const int outputs = 2;
-            var net = new SimpleFuzzyNet(inputs, hidden, () => new RealNumber(0.0), outputNeuronsCount: outputs);
+            Func<double, double> activation = x => 1.0/(1.0 + Math.Exp(-x));
+            var net = new SimpleFuzzyNet(inputs, hidden, () => new RealNumber(0.0), activation, outputNeuronsCount: outputs);
 
             var input = new List<IFuzzyNumber>
                 {
