@@ -163,5 +163,19 @@ namespace NeuroNet.Model.Net
 
             return outputs;
         }
+
+        public List<ILink> GetWeightDeltaLinks()
+        {
+            var deltas = new List<ILink>();
+
+            _output.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => deltas.Add(neuron.GetWeightDelta(j))));
+            foreach (var hiddenLayer in _hiddens)
+            {
+                hiddenLayer.ForeachNeuron(
+                    (i, neuron) => neuron.ForeachWeight((j, weight) => deltas.Add(neuron.GetWeightDelta(j))));
+            }
+
+            return deltas;
+        }
     }
 }
