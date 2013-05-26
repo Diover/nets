@@ -3,7 +3,7 @@
 //
 //Learned!
 //structure: 4-4-1
-//error: 0.95 (two examples are not regonized)
+//error: 0.95 (two examples are not regonized: 23, 34)
 //f(x) = 1.0 / (1.0 + exp(-2(x - 0.5)))
 //
 7.0;3.2;4.7;1.4 0
