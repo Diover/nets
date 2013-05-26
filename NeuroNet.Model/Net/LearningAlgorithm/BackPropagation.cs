@@ -19,10 +19,11 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             _alpha = alpha;
         }
 
-        protected override void LearnBatch(INet net, double currentLearningCycleError)
+        protected override bool LearnBatch(INet net, double currentLearningCycleError)
         {
             ChangeAndSetWeights(_deltas, net);
             _deltas = null;
+            return true;
         }
 
         protected override void LearnPattern(INet net, ILearningPattern learningPattern, double currentPatternError)

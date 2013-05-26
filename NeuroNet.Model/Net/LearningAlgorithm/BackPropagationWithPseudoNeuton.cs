@@ -7,67 +7,74 @@ using NeuroNet.Model.FuzzyNumbers.Vectors;
 
 namespace NeuroNet.Model.Net.LearningAlgorithm
 {
-    public class BackPropagationWithPseudoNeuton : ILearningAlgorithm
+    public class BackPropagationWithPseudoNeuton : BackPropagationBase
     {
-        private readonly List<ILearningPattern> _patterns;
-        private readonly double _errorThreshold; //Emax
-        
         private IVector _gradient;
+        private IFuzzyNumber _gradientDiffNorm;
+        private IVector _prevGradient;
+        private IVector _prevStep;
         private IVector _weights;
         private IMatrix _b; //pseudo-Gessian
         private double _alpha;  //eta (n)
-        private List<ILink> _outputDeltas;
+        private List<ILink> _inputs;
 
-        public BackPropagationWithPseudoNeuton(List<ILearningPattern> patterns, double alpha = 10.7, double errorThreshold = 0.0001)
+        public BackPropagationWithPseudoNeuton(List<ILearningPattern> patterns, double alpha = 10.0, double errorThreshold = 0.0001): base(patterns, errorThreshold)
         {
-            _patterns = patterns;
             _alpha = alpha;
-            _errorThreshold = errorThreshold;
         }
 
-        public void LearnNet(INet net)
+        //here we have _gradient as sum of gradients, should make step in this direction
+        protected override bool LearnBatch(INet net, double currentLearningCycleError)
+        {
+            if (_prevStep != null)
+            {
+                var y = _gradient.Negate().Sum(_prevGradient); //yk
+                //_gradientDiffNorm = y.Norm;
+                //Console.WriteLine("Gradient diff norm: {0}", _gradientDiffNorm.GetMod().X);
+                //Console.WriteLine();
+                //if (IsNetLearned(currentLearningCycleError))
+                //    return;
+                //its time to calculate b(k + 1)
+                _b = CalculateInvertedPseudoGaussian(_b, _prevStep, y);
+            }
+
+            var direction = CalculateMinimizeDirection(_b, _gradient); //pk - direction of next step
+            var step = MakeStep(direction, net, currentLearningCycleError); //step = alpha*pk
+            if (step == null)
+            {
+                
+            }
+
+            //Save step and grad
+            _prevStep = step;
+            _prevGradient = _gradient;
+            //clear gradient vector
+            _gradient = null;
+
+            return true;
+        }
+
+        //here we summarize gradient of each pattern
+        protected override void LearnPattern(INet net, ILearningPattern learningPattern, double currentPatternError)
+        {
+            PropagateErrorOnLayers(net.Layers, learningPattern.Output); //nablaF(xk)
+            var currentGradient = CreateWeightsGradient(net.Layers);
+            _gradient = _gradient == null ? currentGradient : _gradient.Sum(currentGradient);
+        }
+
+        protected override void PrepareToLearning(INet net)
         {
             _b = Matrix.CreateI(net.WeightsCount, net.WeightsCount, () => new RealNumber(1), () => new RealNumber(0)); //b0
-            _weights = CreateWeightsVector(net.Layers); //x0
-            _outputDeltas = CreateOutputsDeltas(net.Layers);
+            _weights = net.GetWeights(); //x0
+            _inputs = net.GetLastInputsForWeights();
+            _prevGradient = null;
+            _prevStep = null;
+        }
 
-            double learningCycleError;
-            double previousLearningCycleError = 0.0;
-            int cycle = 0;
-            do
-            {
-                learningCycleError = 0.0;
-                int algorithmStep = 0;
-                foreach (var learningPattern in _patterns)
-                {
-                    var patternError = CalculatePatternError(net,
-                                                             learningPattern.Input,
-                                                             learningPattern.Output);
-                    learningCycleError += patternError;
-
-                    if (patternError > 0.0)
-                    {
-                        _gradient = CalculateGradientOnLayers(net.Layers, learningPattern.Output); //nablaF(xk)
-                        var direction = CalculateMinimizeDirection(_b, _gradient);
-                        var step = CalculateStepAndChangeAlpha(direction, net.Layers, patternError,
-                                                               () => CalculatePatternError(net,
-                                                                                           learningPattern.Input,
-                                                                                           learningPattern.Output));
-                        
-                        var nextGradient = CalculateGradientOnLayers(net.Layers, learningPattern.Output); //nablaF(xk + 1)
-                        var y = nextGradient.Sum(_gradient.Negate()); //yk
-
-                        //its time to calculate b(k + 1)
-                        _b = CalculateInvertedPseudoGaussian(_b, step, y);
-                    }
-
-                    OnStepPerformed(cycle, algorithmStep, learningCycleError, _gradient.Norm);
-                    algorithmStep++;
-                }
-
-                OnCyclePerformed(cycle, learningCycleError, _gradient.Norm);
-                cycle++;
-            } while (_gradient.Norm.IsGreater(_errorThreshold));
+        protected override bool IsNetLearned(double currentError)
+        {
+            return currentError < ErrorThreshold;
+                //_gradientDiffNorm != null && !_gradientDiffNorm.IsGreater(0.000000000001);
         }
 
         private static IMatrix CalculateInvertedPseudoGaussian(IMatrix b, IVector s, IVector y)
@@ -86,86 +93,6 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return b.Sum(second).Sub(third);
         }
 
-        public event StepPerformedEventHandler StepPerformed;
-        public event CyclePerformedEventHandler CyclePerformed;
-
-        private void OnStepPerformed(int cycle, int step, double stepError, IFuzzyNumber gradientNorm)
-        {
-            if (StepPerformed != null)
-                StepPerformed(new StepState(cycle, step, stepError, gradientNorm));
-        }
-
-        private void OnCyclePerformed(int cycle, double cycleError, IFuzzyNumber gradientNorm)
-        {
-            if (CyclePerformed != null)
-                CyclePerformed(new StepState(cycle, 0, cycleError, gradientNorm));
-        }
-
-        private static double CalculatePatternError(INet net, List<IFuzzyNumber> inputs, List<IFuzzyNumber> outputs)
-        {
-            var actualOutput = net.Propagate(inputs).First();
-            var expectedOutput = outputs.First();
-
-            var errorNumber = actualOutput.Sub(expectedOutput);
-
-            var leftError = 0.0;
-            var rightError = 0.0;
-            errorNumber.ForeachLevel((alpha, level) =>
-            {
-                leftError += alpha * (level.X * level.X);
-                rightError += alpha * (level.Y * level.Y);
-            });
-
-            return leftError / 2.0 + rightError / 2.0;
-        }
-
-        public IVector CalculateGradientOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
-        {
-            var outputLayer = layers.Last();
-            outputLayer.ForeachNeuron((i, neuron) =>
-            {
-                var output = neuron.LastOutput; //Ok
-                var expectedOutput = patternsOutput.ElementAt(i); //tk
-                neuron.PropagatedError =
-                    output.Mul(output.Apply(levelValue => 1 - levelValue))
-                          .Mul(expectedOutput.Sub(output)); //Ok(1-Ok)(tk - Ok)
-            });
-
-            var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers)
-            {
-                hiddenLayer.ForeachNeuron((i, neuron) =>
-                {
-                    var output = neuron.LastOutput; //Ok
-                    var part = output.Mul(output.Apply(levelValue => 1 - levelValue)); //Ok(1 - Ok)
-                    var sum = FuzzyNumberExtensions.Sum(0, outputLayer.NeuronsCount, j => outputLayer.GetNeuron(j)
-                                                                                              .GetWeight(i)
-                                                                                              .Signal
-                                                                                              .Mul(
-                                                                                                  outputLayer
-                                                                                                      .GetNeuron(j)
-                                                                                                      .PropagatedError));
-                    neuron.PropagatedError = part.Mul(sum);
-                });
-            }
-
-            return CreateWeightsGradient(layers);
-        }
-
-        private static void SetWeights(IVector weights, List<ILayer> layers)
-        {
-            var queue = weights.ToQueue();
-
-            var outputLayer = layers.Last();
-            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => weight.Signal = queue.Dequeue()));
-            var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers.Reverse())
-            {
-                hiddenLayer.ForeachNeuron(
-                    (i, neuron) => neuron.ForeachWeight((j, weight) => weight.Signal = queue.Dequeue()));
-            }
-        }
-
         private IVector CreateWeightsGradient(List<ILayer> layers)
         {
             var result = new List<IFuzzyNumber>();
@@ -179,75 +106,46 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
             }
 
-            return new Vector(result.ToArray()).MemberviseMul(ToVector(_outputDeltas));
-        }
-
-        private static IVector CreateWeightsVector(List<ILayer> layers)
-        {
-            var result = new List<IFuzzyNumber>();
-
-            var outputLayer = layers.Last();
-            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(weight.Signal)));
-            var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers.Reverse())
-            {
-                hiddenLayer.ForeachNeuron(
-                    (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(weight.Signal)));
-            }
-
-            return new Vector(result.ToArray());
+            return new Vector(result.ToArray()).MemberviseMul(_inputs.ToSignalsVector());
         }
 
         private static IVector CalculateMinimizeDirection(IMatrix invertedPseudoGessian, IVector gradient)
         {
-            return invertedPseudoGessian.Mul(gradient.Negate());
+            return invertedPseudoGessian.Mul(gradient);
         }
 
-        private static List<ILink> CreateOutputsDeltas(List<ILayer> layers)
+        private IVector MakeStep(IVector direction, INet net, double currentError)
         {
-            var outputs = new List<ILink>();
+            const int maximumNumberOfTry = 50;
+            var numberOfTry = 0;
+            double error;
+            var step = direction.Mul(_alpha); ;
 
-            var outputLayer = layers.Last();
-            outputLayer.ForeachNeuron((i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
-            var hiddenLayers = layers.Take(layers.Count - 1);
-            foreach (var hiddenLayer in hiddenLayers.Reverse())
-            {
-                hiddenLayer.ForeachNeuron(
-                    (i, neuron) => neuron.ForeachWeight((j, weight) => outputs.Add(neuron.GetLastInput(j))));
-            }
-
-            return outputs;
-        }
-
-        private static IVector ToVector(IEnumerable<ILink> links)
-        {
-            var res = links.Select(link => link.Signal).ToArray();
-            return new Vector(res);
-        }
-
-
-        private IVector CalculateStepAndChangeAlpha(IVector direction, List<ILayer> layers, double oldError, Func<double> calculateError)
-        {
             var oldWeights = _weights;
             //can change alpha by minimizing it in f(xk + alpha*direction)
-            double error;
-            IVector step;
             do
             {
-                step = direction.Mul(_alpha);
+                if (numberOfTry > maximumNumberOfTry || _alpha < 0.00000001)
+                    break;
+                
                 _weights = oldWeights.Sum(step); //x(k+1) = xk + sk 
-                SetWeights(_weights, layers);   //content of _weights now shared between net and _weights vector
+                net.SetWeights(_weights); //content of _weights now shared between net and _weights vector
+                error = GetBatchError(net);
+                
+                _alpha /= 2.0;
+                step = direction.Mul(_alpha);
+                numberOfTry++;
+            } while (error > currentError);
 
-                error = calculateError();
-                if (Math.Abs(error - oldError) > _errorThreshold)
-                    _alpha /= 2.0;
+            _alpha = 10.0;
 
-            } while (Math.Abs(error - oldError) > _errorThreshold);
-
-            if (Math.Abs(error - oldError) > _errorThreshold)
+            if (numberOfTry > maximumNumberOfTry || _alpha < 0.00000001)
             {
+                //step = direction.Mul(_alpha);
                 _weights = oldWeights;
-                SetWeights(_weights, layers);
+                net.SetWeights(_weights);
+                _gradient = null;
+                return null;
             }
 
             return step;

@@ -50,7 +50,24 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                 }
                 if(learningCycleError > 0.0)
                 {
-                    LearnBatch(net, learningCycleError);
+                    if (!LearnBatch(net, learningCycleError))
+                    {
+                        Console.WriteLine("SWITCH TO SIMPLE");
+                        var bp = new BackPropagation(_patterns, 0.3, ErrorThreshold);
+                        bp.LearnNet(net);
+                        bp.CyclePerformed +=
+                            (state) =>
+                                {
+                                    //Console.ReadKey();
+                                    if (state.Cycle%50 == 0)
+                                    {
+                                        //Console.ReadKey();
+                                        Console.WriteLine("cycle: " + state.Cycle +
+                                                          " error: " +
+                                                          state.CycleError.ToString("0.#####################"));
+                                    }
+                                };
+                    }
                 }
 
                 OnCyclePerformed(algorithmCycle, learningCycleError);
@@ -58,7 +75,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             } while (!IsNetLearned(learningCycleError));
         }
 
-        protected abstract void LearnBatch(INet net, double currentLearningCycleError);
+        protected abstract bool LearnBatch(INet net, double currentLearningCycleError);
         protected abstract void LearnPattern(INet net, ILearningPattern learningPattern, double currentPatternError);
         protected abstract void PrepareToLearning(INet net);
         protected abstract bool IsNetLearned(double currentError);
@@ -160,6 +177,11 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                         neuron.PropagatedError = part.Mul(sum);
                     });
             }
+        }
+
+        protected double GetBatchError(INet net)
+        {
+            return _patterns.Sum(learningPattern => CalculatePatternError(net, learningPattern));
         }
     }
 }
