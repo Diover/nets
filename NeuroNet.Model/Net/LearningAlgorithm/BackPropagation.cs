@@ -74,41 +74,5 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
             return new Vector(result.ToArray()).MemberviseMul(_outputs.ToSignalsVector());
         }
-
-        private static void PropagateErrorOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
-        {
-            var outputLayer = layers.Last();
-            outputLayer.ForeachNeuron((i, neuron) =>
-                {
-                    var output = neuron.LastOutput; //Ok
-                    var expectedOutput = patternsOutput.ElementAt(i); //tk
-                    var error = output.Mul(output.Apply(levelValue => 1 - levelValue))
-                                      .Mul(expectedOutput.Sub(output))
-                                      .Mul(4.0); //Ok(1-Ok)(tk - Ok)*alpha
-                    //neuron.PropagatedError = neuron.PropagatedError == null ? error : neuron.PropagatedError.Sum(error);
-                    neuron.PropagatedError = error;
-                });
-            
-            //from last to first
-            for (int i = layers.Count - 2; i >= 0; i--)
-            {
-                var layer = layers.ElementAt(i);
-                var nextLayer = layers.ElementAt(i + 1);
-
-                layer.ForeachNeuron((neuronIndex, neuron) =>
-                {
-                    var output = neuron.LastOutput; //Ok
-                    var part = output.Mul(output.Apply(levelValue => 1 - levelValue)).Mul(4.0); //Ok(1 - Ok)*alpha
-                    //var part = output.Mul(output.Apply(levelValue => 1 - levelValue)); //Ok(1 - Ok)
-                    var sum = FuzzyNumberExtensions.Sum(0, nextLayer.NeuronsCount,
-                                                        j => nextLayer.GetNeuron(j).GetWeight(neuronIndex).Signal
-                                                                      .Mul(nextLayer.GetNeuron(j).PropagatedError));
-                    //neuron.PropagatedError = neuron.PropagatedError == null
-                    //                             ? part.Mul(sum)
-                    //                             : neuron.PropagatedError.Sum(part.Mul(sum));
-                    neuron.PropagatedError = part.Mul(sum);
-                });
-            }
-        }
     }
 }
