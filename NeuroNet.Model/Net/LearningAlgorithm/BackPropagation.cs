@@ -10,9 +10,9 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
     public class BackPropagation : BackPropagationBase
     {
         private double _alpha;
-        private IVector _gradient;
         private IVector _weights;
-        private List<ILink> _outputDeltas;
+        private List<ILink> _outputs;
+        private IVector _deltas;
 
         public BackPropagation(List<ILearningPattern> patterns, double alpha = 0.7, double errorThreshold = 0.0001):base(patterns, errorThreshold)
         {
@@ -21,24 +21,31 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
         protected override void LearnBatch(INet net, double currentLearningCycleError)
         {
-            //_gradient = CreateWeightsGradient(net.Layers);
-            //ChangeWeights(_gradient, net);
-            //net.ClearPropagatedError();
+            ChangeAndSetWeights(_deltas, net);
+            _deltas = null;
         }
 
         protected override void LearnPattern(INet net, ILearningPattern learningPattern, double currentPatternError)
         {
             //call only after net.propagation()
-            CalculateGradientOnLayers(net.Layers, learningPattern.Output);
-            _gradient = CreateWeightsGradient(net.Layers);
-            ChangeWeights(_gradient, net);
-            net.ClearPropagatedError();
+            PropagateErrorOnLayers(net.Layers, learningPattern.Output);
+            CalculateWeightDelta(net);
+
+            //ChangeAndSetWeights(_deltas, net);
+            //_deltas = null;
+        }
+
+        private void CalculateWeightDelta(INet net)
+        {
+            var gradient = CreateWeightsGradient(net.Layers);
+            var currentDelta = gradient.Mul(_alpha);
+            _deltas = _deltas == null ? currentDelta : _deltas.Sum(currentDelta);
         }
 
         protected override void PrepareToLearning(INet net)
         {
             _weights = net.GetWeights();
-            _outputDeltas = net.GetLastInputsForWeights();
+            _outputs = net.GetLastInputsForWeights();
         }
 
         protected override bool IsNetLearned(double currentError)
@@ -46,15 +53,10 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             return currentError < ErrorThreshold;
         }
 
-        private IVector ChangeWeights(IVector weightsDelta, INet net)
+        private void ChangeAndSetWeights(IVector delta, INet net)
         {
-            var oldWeights = _weights;
-
-            var step = weightsDelta.Mul(_alpha);
-            _weights = oldWeights.Sum(step);
+            _weights = _weights.Sum(delta);
             net.SetWeights(_weights);
-
-            return step;
         }
 
         private IVector CreateWeightsGradient(List<ILayer> layers)
@@ -70,10 +72,10 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     (i, neuron) => neuron.ForeachWeight((j, weight) => result.Add(neuron.PropagatedError)));
             }
 
-            return new Vector(result.ToArray()).MemberviseMul(_outputDeltas.ToSignalsVector());
+            return new Vector(result.ToArray()).MemberviseMul(_outputs.ToSignalsVector());
         }
 
-        private static void CalculateGradientOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
+        private static void PropagateErrorOnLayers(List<ILayer> layers, List<IFuzzyNumber> patternsOutput)
         {
             var outputLayer = layers.Last();
             outputLayer.ForeachNeuron((i, neuron) =>
@@ -83,7 +85,8 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     var error = output.Mul(output.Apply(levelValue => 1 - levelValue))
                                       .Mul(expectedOutput.Sub(output))
                                       .Mul(4.0); //Ok(1-Ok)(tk - Ok)*alpha
-                    neuron.PropagatedError = neuron.PropagatedError == null ? error : neuron.PropagatedError.Sum(error);
+                    //neuron.PropagatedError = neuron.PropagatedError == null ? error : neuron.PropagatedError.Sum(error);
+                    neuron.PropagatedError = error;
                 });
             
             //from last to first
@@ -100,9 +103,10 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                     var sum = FuzzyNumberExtensions.Sum(0, nextLayer.NeuronsCount,
                                                         j => nextLayer.GetNeuron(j).GetWeight(neuronIndex).Signal
                                                                       .Mul(nextLayer.GetNeuron(j).PropagatedError));
-                    neuron.PropagatedError = neuron.PropagatedError == null
-                                                 ? part.Mul(sum)
-                                                 : neuron.PropagatedError.Sum(part.Mul(sum));
+                    //neuron.PropagatedError = neuron.PropagatedError == null
+                    //                             ? part.Mul(sum)
+                    //                             : neuron.PropagatedError.Sum(part.Mul(sum));
+                    neuron.PropagatedError = part.Mul(sum);
                 });
             }
         }
