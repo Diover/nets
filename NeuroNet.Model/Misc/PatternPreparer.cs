@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using NeuroNet.Model.Net.LearningAlgorithm;
 
 namespace NeuroNet.Model.Misc
@@ -9,6 +10,9 @@ namespace NeuroNet.Model.Misc
     {
         private readonly INumberParser _parser;
         private readonly List<ILearningPattern> _patterns;
+
+        private const char _inputOutputSeparator = ' ';
+        private const char _numbersSeparator = ';';
 
         public TestPatternPreparer(string filename, INumberParser parser)
         {
@@ -38,6 +42,9 @@ namespace NeuroNet.Model.Misc
 
         private LearningPattern ParseLine(string line)
         {
+            int inputOutputSeparator = line.IndexOf(_inputOutputSeparator);
+            string inputsPart = line.Substring(0, inputOutputSeparator);
+            string outputsPart = line.Substring(inputOutputSeparator + 1, line.Length - inputOutputSeparator - 1);
             if(line[0] == '/' && line[1] == '/')
                 return null;
 
@@ -48,7 +55,27 @@ namespace NeuroNet.Model.Misc
             if (inputsPart == "" || outputsPart == "")
                 return null;
 
-            const char numbersSeparator = ';';
+            const char numbersSeparator = _numbersSeparator;
+            var inputsNumbers = inputsPart.Split(numbersSeparator);
+            var inputs = inputsNumbers.Select(_parser.Parse).ToList();
+            var outputsNumbers = outputsPart.Split(numbersSeparator);
+            var outputs = outputsNumbers.Select(_parser.Parse).ToList();
+
+            return new LearningPattern(inputs, outputs);
+        }
+
+        private string PackLine(LearningPattern pattern)
+        {
+            var sb = new StringBuilder();
+            foreach(var input in pattern.)
+            int inputOutputSeparator = line.IndexOf(_inputOutputSeparator);
+            string inputsPart = line.Substring(0, inputOutputSeparator);
+            string outputsPart = line.Substring(inputOutputSeparator + 1, line.Length - inputOutputSeparator - 1);
+
+            if (inputsPart == "" || outputsPart == "")
+                return null;
+
+            const char numbersSeparator = _numbersSeparator;
             var inputsNumbers = inputsPart.Split(numbersSeparator);
             var inputs = inputsNumbers.Select(_parser.Parse).ToList();
             var outputsNumbers = outputsPart.Split(numbersSeparator);
