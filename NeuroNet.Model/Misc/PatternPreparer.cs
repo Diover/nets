@@ -42,9 +42,6 @@ namespace NeuroNet.Model.Misc
 
         private LearningPattern ParseLine(string line)
         {
-            int inputOutputSeparator = line.IndexOf(_inputOutputSeparator);
-            string inputsPart = line.Substring(0, inputOutputSeparator);
-            string outputsPart = line.Substring(inputOutputSeparator + 1, line.Length - inputOutputSeparator - 1);
             if(line[0] == '/' && line[1] == '/')
                 return null;
 
@@ -66,7 +63,7 @@ namespace NeuroNet.Model.Misc
 
         private string PackLine(LearningPattern pattern)
         {
-            var sb = new StringBuilder();
+            /*var sb = new StringBuilder();
             foreach(var input in pattern.)
             int inputOutputSeparator = line.IndexOf(_inputOutputSeparator);
             string inputsPart = line.Substring(0, inputOutputSeparator);
@@ -81,7 +78,8 @@ namespace NeuroNet.Model.Misc
             var outputsNumbers = outputsPart.Split(numbersSeparator);
             var outputs = outputsNumbers.Select(_parser.Parse).ToList();
 
-            return new LearningPattern(inputs, outputs);
+            return new LearningPattern(inputs, outputs);*/
+            return "";
         }
 
         public List<ILearningPattern> PreparePatterns()
