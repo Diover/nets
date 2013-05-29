@@ -3,5 +3,6 @@
     public interface ILearningAlgorithm
     {
         void LearnNet(INet net);
+        void StopLearning();
     }
 }

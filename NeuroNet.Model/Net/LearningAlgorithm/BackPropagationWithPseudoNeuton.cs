@@ -42,7 +42,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             var step = MakeStep(direction, net, currentLearningCycleError); //step = alpha*pk
             if (step == null)
             {
-                
+                return false;
             }
 
             //Save step and grad
@@ -67,6 +67,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             _b = Matrix.CreateI(net.WeightsCount, net.WeightsCount, () => new RealNumber(1), () => new RealNumber(0)); //b0
             _weights = net.GetWeights(); //x0
             _inputs = net.GetLastInputsForWeights();
+            _gradient = null;
             _prevGradient = null;
             _prevStep = null;
         }
@@ -125,7 +126,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             //can change alpha by minimizing it in f(xk + alpha*direction)
             do
             {
-                if (numberOfTry > maximumNumberOfTry || _alpha < 0.00000001)
+                if (numberOfTry > maximumNumberOfTry || _alpha < 0.000000000001)
                     break;
                 
                 _weights = oldWeights.Sum(step); //x(k+1) = xk + sk 
@@ -137,17 +138,19 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                 numberOfTry++;
             } while (error > currentError);
 
-            _alpha = 10.0;
-
-            if (numberOfTry > maximumNumberOfTry || _alpha < 0.00000001)
+            if (numberOfTry > maximumNumberOfTry || _alpha < 0.000000000001)
             {
+                Console.WriteLine("Switch to Simple. Too little alpha: {0:0.#############}.", _alpha);
                 //step = direction.Mul(_alpha);
                 _weights = oldWeights;
                 net.SetWeights(_weights);
+                //AddLittleCorrectionToWeights(net.Layers);
                 _gradient = null;
+                _alpha = 100.0;
                 return null;
             }
 
+            _alpha = 10.0;
             return step;
         }
     }
