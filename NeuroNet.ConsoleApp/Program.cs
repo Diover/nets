@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NeuroNet.Model.FuzzyNumbers;
 using NeuroNet.Model.FuzzyNumbers.Vectors;
@@ -60,11 +62,11 @@ namespace NeuroNet.ConsoleApp
             var fx = b.Minimum;
             */
 
-            const int inputsCount = 2;
-            const int hiddenNeuronsCount = 2;
-            const int outputNeuronsCount = 1;
+            const int inputsCount = 10;
+            const int hiddenNeuronsCount = 10;
+            const int outputNeuronsCount = 3;
             //var net = new SimpleFuzzyNet(inputsCount, new[] {hiddenNeuronsCount}, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 11), levelsCount: 11);
-            var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount }, RealNumber.GenerateLittleNumber, outputNeuronsCount: outputNeuronsCount);
+            var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount, hiddenNeuronsCount }, RealNumber.GenerateLittleNumber, outputNeuronsCount: outputNeuronsCount);
             /*
             //weights for 2-2-1 net for XOR function
             var weights = new Vector(new IFuzzyNumber[]
@@ -82,7 +84,7 @@ namespace NeuroNet.ConsoleApp
                 });
             net.SetWeights(weights);
             */
-            const string filename = "testPatternsXOR.txt";
+            const string filename = "vines-params10-count178-classes3-learning.txt";
             var numberParser = new RealNumberParser();
             //const string filename = "testPatterns.txt";
             //var numberParser = new FuzzyNumberParser();
@@ -90,7 +92,7 @@ namespace NeuroNet.ConsoleApp
             var patterns = new TestPatternPreparer(Path.Combine("../../../Misc", filename), numberParser).PreparePatterns();
             //var patterns = CreatePatterns((x, y) => Math.Abs(Math.Sin(x) + Math.Sin(y))/2.0);
             
-            var bp = new BackPropagation(patterns, 2.0, 0.001);
+            /*var bp = new BackPropagation(patterns, 0.4, 0.01);
             bp.CyclePerformed +=
                 (state) =>
                 {
@@ -100,20 +102,29 @@ namespace NeuroNet.ConsoleApp
                         Console.WriteLine("cycle: " + state.Cycle +
                                           " error: " + state.CycleError.ToString("0.#####################"));
                     }
-                };
+                };*/
 
-            /*var bp = new BackPropagationWithPseudoNeuton(patterns);
+            var bp = new BackPropagationWithPseudoNeuton(patterns);
             bp.CyclePerformed +=
                 (state) =>
                     {
                         //Console.ReadKey();
-                        if (state.Cycle % 100 == 0)
+                        //if (state.Cycle % 10 == 0)
                             Console.WriteLine("cycle: " + state.Cycle +
-                                              " error: " + state.CycleError.ToString("0.#########################") +
-                                              " grad: " + state.GradientNorm.ToString());
-                    };*/
+                                              " error: " + state.CycleError.ToString("0.#########################"));
+                    };
 
             bp.LearnNet(net);
+            
+            var key = new ConsoleKeyInfo();
+            do
+            {
+                while(Console.KeyAvailable == false)
+                    Thread.Sleep(200);
+                key = Console.ReadKey();
+            } while (key.Key != ConsoleKey.Escape);
+            
+            bp.StopLearning();
 
             Console.WriteLine("Learning finished. Press any key...");
             Console.ReadKey();
