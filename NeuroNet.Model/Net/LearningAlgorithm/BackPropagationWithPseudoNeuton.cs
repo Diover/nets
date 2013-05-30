@@ -17,8 +17,9 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
         private IMatrix _b; //pseudo-Gessian
         private double _alpha;  //eta (n)
         private List<ILink> _inputs;
+        private Random _random = new Random();
 
-        public BackPropagationWithPseudoNeuton(List<ILearningPattern> patterns, double alpha = 10.0, double errorThreshold = 0.0001): base(patterns, errorThreshold)
+        public BackPropagationWithPseudoNeuton(List<ILearningPattern> patterns, double alpha = 1.0, double errorThreshold = 0.0001): base(patterns, errorThreshold)
         {
             _alpha = alpha;
         }
@@ -39,10 +40,11 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             }
 
             var direction = CalculateMinimizeDirection(_b, _gradient); //pk - direction of next step
-            var step = MakeStep(direction, net, currentLearningCycleError); //step = alpha*pk
+            //var step = MakeStep(direction, net, currentLearningCycleError); //step = alpha*pk
+            var step = MakeStepGoldstein(direction, net, currentLearningCycleError, _gradient); //step = alpha*pk
             if (step == null)
             {
-                return false;
+                
             }
 
             //Save step and grad
@@ -151,6 +153,51 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             }
 
             _alpha = 10.0;
+            return step;
+        }
+
+        private IVector MakeStepGoldstein(IVector direction, INet net, double currentError, IVector gradient)
+        {
+            const int maximumNumberOfTry = 50;
+            var numberOfTry = 0;
+            double error;
+            var step = direction.Mul(_alpha); ;
+            var c = 0.1;
+            var p = _random.NextDouble()*0.3 + 0.3;
+
+            var oldWeights = _weights;
+            //can change alpha by minimizing it in f(xk + alpha*direction)
+            var threshold = 0.0;
+            do
+            {
+                if (numberOfTry > maximumNumberOfTry || _alpha < 0.00001)
+                    break;
+
+                _weights = oldWeights.Sum(step); //x(k+1) = xk + sk 
+                net.SetWeights(_weights); //content of _weights now shared between net and _weights vector
+                error = GetBatchError(net);
+
+                threshold = gradient.Mul(step).Mul(_alpha).Mul(c).GetMod().X;
+
+                _alpha *= p;
+                step = direction.Mul(_alpha);
+                numberOfTry++;
+            } while (error > currentError + threshold);
+            
+
+            if (numberOfTry > maximumNumberOfTry || _alpha < 0.00001)
+            {
+                _weights = oldWeights;
+                net.SetWeights(_weights);
+                //will make gradient descent on next step
+                _gradient = null;
+                _b = Matrix.CreateI(net.WeightsCount, net.WeightsCount, () => new RealNumber(1), () => new RealNumber(0)); //b0
+                _alpha = 1.0;
+                Console.WriteLine("Reset matrix");
+                return null;
+            }
+
+            _alpha = 1.0;
             return step;
         }
     }
