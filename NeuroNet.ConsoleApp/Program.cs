@@ -40,12 +40,11 @@ namespace NeuroNet.ConsoleApp
 
         static void Main(string[] args)
         {
-            /*var b = new BfgsMethod();
-            var f =
+            /*var f =
                 new Func<IVector, double>(
                     vector =>
                     -Math.Exp(-Math.Pow(vector[0].GetMod().X - 1, 2)) -
-                    Math.Exp(-0.5*Math.Pow(vector[1].GetMod().X - 2, 2)));
+                    Math.Exp(-0.5 * Math.Pow(vector[1].GetMod().X - 2, 2)));
 
             Func<IVector, IVector> g = vector => new Vector(new[]
                 {
@@ -54,13 +53,40 @@ namespace NeuroNet.ConsoleApp
 
                     // df/dy = {-  e^(-1/2 (y-2)^2) (y-2)}
                     new RealNumber(Math.Exp(-0.5*Math.Pow(vector[1].GetMod().X - 2, 2))*(vector[1].GetMod().X - 2))
-                });
+                });*/
+            
+            /*var f = new Func<IVector, double>(
+                    vector =>
+                    //(1 - x)^2 + 100(-x^2 + y)^2
+                    Math.Pow(1 - vector[0].GetMod().X, 2) + 100 * Math.Pow(-Math.Pow(vector[0].GetMod().X, 2) + vector[1].GetMod().X, 2) );
+            Func<IVector, IVector> g = vector => new Vector(new[]
+                {
+                    // df/dx = {-2x + 200(-x^2 + y)(-2)x } 
+                    new RealNumber( -2.0*vector[0].GetMod().X - 400*(-Math.Pow(vector[0].GetMod().X, 2) + vector[1].GetMod().X)*vector[0].GetMod().X ),
 
-            b.Minimize(f, g, 2);
+                    // df/dy = {200(-x^2 + y)}
+                    new RealNumber(200*( -Math.Pow(vector[0].GetMod().X, 2) + vector[1].GetMod().X ))
+                });*/
 
-            var x = b.Values;
-            var fx = b.Minimum;
-            */
+            /*var f = new Func<IVector, double>(
+                    vector =>
+                        //(1 - x)^2 + (1 - y)^2
+                    Math.Pow(1.0 - vector[0].GetMod().X, 2) + Math.Pow(1.0 - vector[1].GetMod().X, 2));
+            Func<IVector, IVector> g = vector => new Vector(new[]
+                {
+                    // df/dx = {-2(1 - x)} 
+                    new RealNumber( -2.0*(1.0 - vector[0].GetMod().X) ),
+
+                    // df/dy = {-2(1 - y)}
+                    new RealNumber( -2.0*(1.0 - vector[1].GetMod().X) )
+                });*/
+            
+            //var b = new BfgsMethod();
+            //b.Minimize(f, g, 2);
+
+            //var x = b.Values;
+            //var fx = b.Minimum;
+            //return;
 
             const int inputsCount = 10;
             const int hiddenNeuronsCount = 10;
