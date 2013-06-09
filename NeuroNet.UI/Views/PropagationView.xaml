@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="NeuroNet.UI.Views.PropagationView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Margin" Value="10"/>
+        </Style>
+    </UserControl.Resources>
+    
+    <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0"
+                     Text="{Binding Patterns, FallbackValue=smth}"
+                     Height="200" TextWrapping="Wrap" AcceptsReturn="True"
+                     Margin="10"/>
+            <StackPanel Grid.Column="1" Orientation="Vertical">
+                <Button Command="{Binding LoadPatternsCommand}" Content="Загрузить шаблоны"
+                        Style="{StaticResource ButtonStyle}"
+                        />
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Vertical">
+                <Label Content="Входной сигнал сети" HorizontalAlignment="Left"
+                       FontSize="15"
+                       Margin="10 0 0 0"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Width="300" Margin="10" Height="20"
+                             Text="{Binding Input, FallbackValue=94759759}"/>
+                    <Button Command="{Binding PropagateSignalCommand}" Content="Распространить"
+                            Style="{StaticResource ButtonStyle}"
+                            />
+                </StackPanel>
+            </StackPanel>
+            <TextBox Grid.Row="1" Text="{Binding LastOutputSignal, FallbackValue=4579}" IsReadOnly="True"
+                     HorizontalAlignment="Stretch"
+                     Height="20" Margin="10"/>
+        </Grid>
+        <StackPanel Grid.Row="0" Grid.Column="1" 
+                    Margin="20 0 0 0"
+                    Orientation="Vertical">
+            <Label Content="Параметры сети" Margin="0 6 0 0" HorizontalAlignment="Center"/>
+            <Label Content="Количество входов" Margin="0 6 0 0"/>
+            <Label Content="Количество нейронов скрытого слоя" Margin="0 6 0 0"/>
+            <Label Content="Количество выходов" Margin="0 6 0 0"/>
+            <Label Content="Параметр а сигмоидальной функции" Margin="0 6 0 0"/>
+            <Label Content="Параметр b сигмоидальной функции" Margin="0 6 0 0"/>
+
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="2" 
+                    Orientation="Vertical">
+            <Label Content="" Margin="0 6 0 0"/>
+            <Label Content="{Binding InputsCount, FallbackValue=28}" Margin="0 6 0 0"/>
+            <Label Content="{Binding HiddenCount, FallbackValue=35}" Margin="0 6 0 0"/>
+            <Label Content="{Binding OutputsCount, FallbackValue=5}" Margin="0 6 0 0"/>
+            <Label Content="{Binding AlphaParameter, FallbackValue=0.2}" Margin="0 6 0 0"/>
+            <Label Content="{Binding BetaParameter, FallbackValue=0}" Margin="0 6 0 0"/>
+
+        </StackPanel>
+    </Grid>
+</UserControl>
