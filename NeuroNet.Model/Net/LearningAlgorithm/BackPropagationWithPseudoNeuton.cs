@@ -40,8 +40,8 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
             }
 
             var direction = CalculateMinimizeDirection(_b, _gradient); //pk - direction of next step
-            //var step = MakeStep(direction, net, currentLearningCycleError); //step = alpha*pk
-            var step = MakeStepGoldstein(direction, net, currentLearningCycleError, _gradient); //step = alpha*pk
+            var step = MakeStep(direction, net, currentLearningCycleError); //step = alpha*pk
+            //var step = MakeStepGoldstein(direction, net, currentLearningCycleError, _gradient); //step = alpha*pk
             if (step == null)
             {
                 
@@ -135,24 +135,24 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
                 net.SetWeights(_weights); //content of _weights now shared between net and _weights vector
                 error = GetBatchError(net);
                 
-                _alpha /= 2.0;
+                _alpha /= 2.1;
                 step = direction.Mul(_alpha);
                 numberOfTry++;
             } while (error > currentError);
 
             if (numberOfTry > maximumNumberOfTry || _alpha < 0.000000000001)
             {
-                Console.WriteLine("Switch to Simple. Too little alpha: {0:0.#############}.", _alpha);
+                Console.WriteLine("Simple step was performed. Too little alpha: {0:0.#############}.", _alpha);
                 //step = direction.Mul(_alpha);
-                _weights = oldWeights;
+                _weights = oldWeights.Sum(direction.Mul(0.1));
                 net.SetWeights(_weights);
                 //AddLittleCorrectionToWeights(net.Layers);
-                _gradient = null;
-                _alpha = 100.0;
+                //_gradient = null;
+                _alpha = 1.0;
                 return null;
             }
 
-            _alpha = 10.0;
+            _alpha = 1.0;
             return step;
         }
 

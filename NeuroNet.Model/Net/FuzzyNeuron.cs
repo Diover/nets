@@ -8,7 +8,7 @@ namespace NeuroNet.Model.Net
     [Serializable]
     public class FuzzyNeuron : IFuzzyNeuron
     {
-        private readonly Func<double, double> _f = x => 1.0/(1.0 + Math.Exp(-4.0*(x - 0.5)));//x => 1.0/(1.0 + Math.Exp(-x));
+        private readonly Func<double, double> _f = x => 1.0 / (1.0 + Math.Exp(-0.5 * (x - 0.0)));//x => 1.0/(1.0 + Math.Exp(-x));
         private readonly Func<IFuzzyNumber> _generateLittleFuzzyNumber;
         private readonly List<ILink> _inputs = new List<ILink>();
         private readonly List<ILink> _weights = new List<ILink>();

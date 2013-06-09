@@ -24,7 +24,7 @@ namespace NeuroNet.Model.Net.LearningAlgorithm
 
         public override string ToString()
         {
-            return string.Join(",", Input.Select(number => number.ToString())) + ": " + string.Join(",", Output.Select(number => number.ToString()));
+            return string.Join(" ", Input.Select(number => number.ToString())) + ": " + string.Join(",", Output.Select(number => number.ToString()));
         }
     }
 }

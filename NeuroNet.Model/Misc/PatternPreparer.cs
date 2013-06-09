@@ -45,17 +45,16 @@ namespace NeuroNet.Model.Misc
             if(line[0] == '/' && line[1] == '/')
                 return null;
 
-            int inputOutputSeparatorPosition = line.IndexOf(' ');
+            int inputOutputSeparatorPosition = line.IndexOf(_inputOutputSeparator);
             string inputsPart = line.Substring(0, inputOutputSeparatorPosition);
             string outputsPart = line.Substring(inputOutputSeparatorPosition + 1, line.Length - inputOutputSeparatorPosition - 1);
 
             if (inputsPart == "" || outputsPart == "")
                 return null;
 
-            const char numbersSeparator = _numbersSeparator;
-            var inputsNumbers = inputsPart.Split(numbersSeparator);
+            var inputsNumbers = inputsPart.Split(_numbersSeparator);
             var inputs = inputsNumbers.Select(_parser.Parse).ToList();
-            var outputsNumbers = outputsPart.Split(numbersSeparator);
+            var outputsNumbers = outputsPart.Split(_numbersSeparator);
             var outputs = outputsNumbers.Select(_parser.Parse).ToList();
 
             return new LearningPattern(inputs, outputs);

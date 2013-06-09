@@ -56,6 +56,7 @@
     <Compile Include="FuzzyNumbers\MathExtensionsShould.cs" />
     <Compile Include="FuzzyNumbers\Vectors\VectorShould.cs" />
     <Compile Include="Misc\BinarySerializerShould.cs" />
+    <Compile Include="Misc\MarketSeriesPatternPreparerShould.cs" />
     <Compile Include="Misc\TestPatternPreparerShould.cs" />
     <Compile Include="Net\FuzzyNeuronShould.cs" />
     <Compile Include="Net\LearningAlgorithm\BackPropagationShould.cs" />

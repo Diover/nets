@@ -65,6 +65,8 @@
     <Compile Include="Misc\IPatternPreparer.cs" />
     <Compile Include="Misc\IPricesProvider.cs" />
     <Compile Include="Misc\LocalPricesProvider.cs" />
+    <Compile Include="Misc\MarketSeriesPatternPreparer.cs" />
+    <Compile Include="Misc\MarketTick.cs" />
     <Compile Include="Misc\PatternPreparer.cs" />
     <Compile Include="Misc\RealNumberParser.cs" />
     <Compile Include="Net\FuzzyNeuron.cs" />
@@ -82,6 +84,7 @@
     <Compile Include="Net\LearningAlgorithm\INeuronWeightsChanger.cs" />
     <Compile Include="Net\Layer.cs" />
     <Compile Include="Net\LearningAlgorithm\LearningPattern.cs" />
+    <Compile Include="Net\LearningAlgorithm\MarketTickPattern.cs" />
     <Compile Include="Net\LearningAlgorithm\StepState.cs" />
     <Compile Include="Net\Link.cs" />
     <Compile Include="Net\LinkExtensions.cs" />

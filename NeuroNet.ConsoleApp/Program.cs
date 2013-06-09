@@ -88,11 +88,11 @@ namespace NeuroNet.ConsoleApp
             //var fx = b.Minimum;
             //return;
 
-            const int inputsCount = 10;
-            const int hiddenNeuronsCount = 10;
+            const int inputsCount = 5;
+            const int hiddenNeuronsCount = 11;
             const int outputNeuronsCount = 3;
             //var net = new SimpleFuzzyNet(inputsCount, new[] {hiddenNeuronsCount}, () => DiscreteFuzzyNumber.GenerateLittleNumber(levelsCount: 11), levelsCount: 11);
-            var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount, hiddenNeuronsCount }, RealNumber.GenerateLittleNumber, outputNeuronsCount: outputNeuronsCount);
+            var net = new SimpleFuzzyNet(inputsCount, new[] { hiddenNeuronsCount, hiddenNeuronsCount}, RealNumber.GenerateLittleNumber, outputNeuronsCount: outputNeuronsCount);
             /*
             //weights for 2-2-1 net for XOR function
             var weights = new Vector(new IFuzzyNumber[]
@@ -110,15 +110,16 @@ namespace NeuroNet.ConsoleApp
                 });
             net.SetWeights(weights);
             */
-            const string filename = "vines-params10-count178-classes3-learning.txt";
+            const string filename = "marketPatterns-params5-3outputs-learning.txt";
             var numberParser = new RealNumberParser();
             //const string filename = "testPatterns.txt";
             //var numberParser = new FuzzyNumberParser();
             
-            var patterns = new TestPatternPreparer(Path.Combine("../../../Misc", filename), numberParser).PreparePatterns();
+            //var patterns = new TestPatternPreparer(Path.Combine("../../../Misc", filename), numberParser).PreparePatterns();
+            var patterns = new MarketSeriesPatternPreparer(Path.Combine("../../../Misc", filename), numberParser).PreparePatterns();
             //var patterns = CreatePatterns((x, y) => Math.Abs(Math.Sin(x) + Math.Sin(y))/2.0);
             
-            /*var bp = new BackPropagation(patterns, 0.4, 0.01);
+            var bp = new BackPropagation(patterns, 0.05, 0.01);
             bp.CyclePerformed +=
                 (state) =>
                 {
@@ -128,9 +129,9 @@ namespace NeuroNet.ConsoleApp
                         Console.WriteLine("cycle: " + state.Cycle +
                                           " error: " + state.CycleError.ToString("0.#####################"));
                     }
-                };*/
+                };
 
-            var bp = new BackPropagationWithPseudoNeuton(patterns);
+            /*var bp = new BackPropagationWithPseudoNeuton(patterns);
             bp.CyclePerformed +=
                 (state) =>
                     {
@@ -138,7 +139,7 @@ namespace NeuroNet.ConsoleApp
                         //if (state.Cycle % 10 == 0)
                             Console.WriteLine("cycle: " + state.Cycle +
                                               " error: " + state.CycleError.ToString("0.#########################"));
-                    };
+                    };*/
 
             bp.LearnNet(net);
             
@@ -151,6 +152,30 @@ namespace NeuroNet.ConsoleApp
             } while (key.Key != ConsoleKey.Escape);
             
             bp.StopLearning();
+            
+            Console.WriteLine("Simple method finished");
+
+            var bp2 = new BackPropagationWithPseudoNeuton(patterns);
+            bp2.CyclePerformed +=
+                (state) =>
+                {
+                    //Console.ReadKey();
+                    //if (state.Cycle % 10 == 0)
+                    Console.WriteLine("cycle: " + state.Cycle +
+                                      " error: " + state.CycleError.ToString("0.#########################"));
+                };
+
+            //bp2.LearnNet(net);
+            
+            var key1 = new ConsoleKeyInfo();
+            do
+            {
+                while (Console.KeyAvailable == false)
+                    Thread.Sleep(200);
+                key1 = Console.ReadKey();
+            } while (key1.Key != ConsoleKey.Escape);
+
+            bp2.StopLearning();
 
             Console.WriteLine("Learning finished. Press any key...");
             Console.ReadKey();

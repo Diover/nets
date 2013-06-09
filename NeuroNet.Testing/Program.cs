@@ -12,8 +12,9 @@ namespace NeuroNet.Testing
     {
         static void Main(string[] args)
         {
-            var net = BinaryFileSerializer.LoadNetState("../../../Misc/LearnedNet testPatternsXOR 2-2-1.net");
-            var patterns = new TestPatternPreparer("../../../Misc/testPatternsXOR.txt", new RealNumberParser()).PreparePatterns();
+            var net = BinaryFileSerializer.LoadNetState("../../../Misc/LearnedNet marketPatterns-params5-3outputs-learning 5-11-3.net");
+            //var patterns = new TestPatternPreparer("../../../Misc/marketPatterns-test.txt", new RealNumberParser()).PreparePatterns();
+            var patterns = new MarketSeriesPatternPreparer("../../../Misc/marketPatterns-test.txt", new RealNumberParser()).PreparePatterns();
             var output = patterns.Select(pattern => net.Propagate(pattern.Input)).ToList();
 
             for (int i = 0; i < patterns.Count; i++)
